@@ -3,6 +3,7 @@ import os
 import shutil
 
 from PySide6.QtWidgets import QApplication, QMainWindow, QFileDialog
+from PySide6.QtCore import QThread
 from PySide6.QtGui import QIcon
 from ui_app import Ui_MainWindow
 
@@ -102,6 +103,8 @@ class MainWindow(QMainWindow):
             self.ui.usingPortLabel.setText(f"Using Port: -")
             self.ui.startPushButton.setText("Start reciever")
             self.recieving = False
+            self.recieverThread.quit()
+            self.recieverThread = None
             return
         
         self.recieving = True
@@ -112,10 +115,7 @@ class MainWindow(QMainWindow):
         self.ui.StartStatusContainer.setStyleSheet("QWidget {\nbackground-color: orange;\nborder-radius: 7px\n}")
         self.ui.startPushButton.setText("Stop reciever")
 
-
-        client, addr = self.recieverSocket.accept()
-        print(client, addr)
-        
+        self.recieverThread = sk.RecieverThread(self.recieverSocket)
 
 
 
@@ -135,3 +135,5 @@ if __name__ == "__main__":
 
     if window.recieverSocket:
         window.recieverSocket.close()
+    if window.recieverThread:
+        window.recieverThread.quit()

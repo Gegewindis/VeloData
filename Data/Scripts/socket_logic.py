@@ -7,6 +7,7 @@ from socket import (
     )
 from Crypto.Cipher import AES
 import os
+from PySide6.QtCore import QThread
 
 KEY = b"VeloDataTestKey1"
 NOISE = b"ThisIsSomeTstSlt"
@@ -21,10 +22,7 @@ def setUpReciever() -> tuple[socket, int]:
     return (serverSocket, port)
 
 def waitForFiles(serverSocket: socket) -> None:
-    print("CONNECT")
-    # while True:      
-    #     connectionSocket, addr = serverSocket.accept()
-    #     message = connectionSocket.recv(2048).decode()
+    pass
 
 def getUserIp() -> str:
     return gethostbyname(gethostname())
@@ -55,4 +53,16 @@ def sendFiles(client: socket, fileSent=None):
             fileSent(fileName)
 
         os.remove(f"Sending_files/{fileName}")
-        
+
+class RecieverThread(QThread):
+    def __init__(self, serverSocket: socket):
+        super().__init__()
+        self.running = True
+        self.serverSocket = serverSocket
+
+    def run(self):
+        while self.running:
+            client, addr = self.serverSocket.accept()
+            print(client, addr)
+    def stop(self):
+        self.running = False
