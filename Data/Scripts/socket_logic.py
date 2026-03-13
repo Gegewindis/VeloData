@@ -8,7 +8,9 @@ from socket import (
 from Crypto.Cipher import AES
 import os
 from PySide6.QtCore import QThread
+from pathlib import Path
 
+DOWNLOAD_DIR = Path.home() / "Downloads"
 KEY = b"VeloDataTestKey1"
 NOISE = b"ThisIsSomeTstSlt"
 CIPHER = AES.new(KEY, AES.MODE_EAX, NOISE)
@@ -79,7 +81,7 @@ class RecieverThread(QThread):
 
                 # Decrypt and save
                 data = CIPHER.decrypt(data)
-                with open(f"Received_files/{fileName}", "wb") as fh:
+                with open(f"DOWNLOAD_DIR/{fileName}", "wb") as fh:
                     fh.write(data)
 
     def recvAll(self, sock: socket, size: int):
