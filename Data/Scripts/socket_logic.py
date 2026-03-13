@@ -33,7 +33,7 @@ def senderConnect(hostName : str | int, port: int) -> socket:
         return None
     
 def sendFiles(client: socket, fileSent: callable, sentProgress: callable):
-    sentProgress(0)
+    sentProgress.emit(0)
     fileNames = os.listdir("Sending_files/")
     fileNames.remove(".gitkeep")
     for i, fileName in enumerate(fileNames):
@@ -49,12 +49,12 @@ def sendFiles(client: socket, fileSent: callable, sentProgress: callable):
         client.send(data)
 
         fileSent.emit(fileName)
-        sentProgress.emit(i/len(fileNames))
+        sentProgress.emit(int(i/len(fileNames)))
 
         os.remove(f"Sending_files/{fileName}")
 
 class RecieverThread(QThread):
-    statusFunc = Signal(StopIteration)
+    statusFunc = Signal(str)
     def __init__(self, serverSocket: socket):
         super().__init__()
         self.running = True
@@ -75,7 +75,7 @@ class RecieverThread(QThread):
             # Receive filename
                 nameSize = int.from_bytes(self.recvAll(client, 4), "big")
                 if not nameSize:
-                    self.conneced = False
+                    self.connected = False
                     self.statusFunc.emit("orange")
                 else: # If the connection is not active then don't continue
                     fileName = self.recvAll(client, nameSize).decode()
@@ -113,4 +113,4 @@ class SenderThread(QThread):
         try:
             sendFiles(self.client, self.fileSent, self.sentProgress)
         except:
-            self.sentProgress("orange")
+            self.sentStatus.emit("orange")

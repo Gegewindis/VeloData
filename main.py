@@ -83,8 +83,8 @@ class MainWindow(QMainWindow):
 
     def sendPushButton_callback(self):
         self.senderThread = sk.SenderThread(self.senderSocket)
-        self.senderThread.fileSentSignal.connect(self.file_sent)
-        self.senderThread.progressSignal.connect(self.sent_set_percent)
+        self.senderThread.fileSent.connect(self.file_sent)
+        self.senderThread.sentProgress.connect(self.sent_set_percent)
         self.senderThread.sentStatus.connect(self.sender_set_status)
         self.senderThread.start()
 
@@ -154,6 +154,8 @@ if __name__ == "__main__":
 
     if window.recieverThread:
         window.recieverThread.quit()
+        window.recieverThread.wait()
 
     if window.senderThread:
         window.senderThread.quit()
+        window.senderThread.wait()
