@@ -20,6 +20,8 @@ from PySide6.QtWidgets import (QApplication, QComboBox, QFrame, QHBoxLayout,
     QPushButton, QSizePolicy, QSpacerItem, QStackedWidget,
     QVBoxLayout, QWidget)
 
+from Data.Scripts.own_widgets import DropFileLabel
+
 class Ui_MainWindow(object):
     def setupUi(self, MainWindow):
         if not MainWindow.objectName():
@@ -111,6 +113,7 @@ class Ui_MainWindow(object):
         self.menuContainer = QFrame(self.senderPage)
         self.menuContainer.setObjectName(u"menuContainer")
         self.menuContainer.setMinimumSize(QSize(250, 0))
+        self.menuContainer.setMaximumSize(QSize(250, 16777215))
         self.menuContainer.setStyleSheet(u"QFrame {\n"
 "	background-color: rgb(45, 45, 45);\n"
 "	border: none;\n"
@@ -292,7 +295,7 @@ class Ui_MainWindow(object):
 "}")
         self.dropFileContainer.setFrameShape(QFrame.Shape.StyledPanel)
         self.dropFileContainer.setFrameShadow(QFrame.Shadow.Raised)
-        self.dropFileLabel = QLabel(self.dropFileContainer)
+        self.dropFileLabel = DropFileLabel(self.dropFileContainer)
         self.dropFileLabel.setObjectName(u"dropFileLabel")
         self.dropFileLabel.setGeometry(QRect(20, 90, 561, 241))
         font4 = QFont()
@@ -310,10 +313,6 @@ class Ui_MainWindow(object):
         self.browsePushButton.setFont(font1)
         self.browsePushButton.setCursor(QCursor(Qt.CursorShape.PointingHandCursor))
         self.removeComboBox = QComboBox(self.dropFileContainer)
-        self.removeComboBox.addItem("")
-        self.removeComboBox.addItem("")
-        self.removeComboBox.addItem("")
-        self.removeComboBox.addItem("")
         self.removeComboBox.setObjectName(u"removeComboBox")
         self.removeComboBox.setGeometry(QRect(350, 30, 211, 41))
         self.removeComboBox.setMaximumSize(QSize(16777213, 16777215))
@@ -475,15 +474,15 @@ class Ui_MainWindow(object):
         self.horizontalLayout_12 = QHBoxLayout(self.StartContainer)
         self.horizontalLayout_12.setObjectName(u"horizontalLayout_12")
         self.horizontalLayout_12.setContentsMargins(0, 0, 0, 0)
-        self.StartPushButton = QPushButton(self.StartContainer)
-        self.StartPushButton.setObjectName(u"StartPushButton")
-        self.StartPushButton.setMinimumSize(QSize(0, 50))
-        self.StartPushButton.setMaximumSize(QSize(160, 16777215))
-        self.StartPushButton.setFont(font1)
-        self.StartPushButton.setCursor(QCursor(Qt.CursorShape.PointingHandCursor))
-        self.StartPushButton.setStyleSheet(u"")
+        self.startPushButton = QPushButton(self.StartContainer)
+        self.startPushButton.setObjectName(u"startPushButton")
+        self.startPushButton.setMinimumSize(QSize(0, 50))
+        self.startPushButton.setMaximumSize(QSize(160, 16777215))
+        self.startPushButton.setFont(font1)
+        self.startPushButton.setCursor(QCursor(Qt.CursorShape.PointingHandCursor))
+        self.startPushButton.setStyleSheet(u"")
 
-        self.horizontalLayout_12.addWidget(self.StartPushButton)
+        self.horizontalLayout_12.addWidget(self.startPushButton)
 
         self.StartStatusContainer = QWidget(self.StartContainer)
         self.StartStatusContainer.setObjectName(u"StartStatusContainer")
@@ -533,7 +532,7 @@ class Ui_MainWindow(object):
 
         self.retranslateUi(MainWindow)
 
-        self.stackedWidget.setCurrentIndex(0)
+        self.stackedWidget.setCurrentIndex(1)
 
 
         QMetaObject.connectSlotsByName(MainWindow)
@@ -551,26 +550,18 @@ class Ui_MainWindow(object):
         self.portLineEdit.setText("")
         self.portLineEdit.setPlaceholderText(QCoreApplication.translate("MainWindow", u"Recieving port", None))
         self.connectPushButton.setText(QCoreApplication.translate("MainWindow", u"Connect", None))
-        self.errorPlainTextEdit.setPlainText(QCoreApplication.translate("MainWindow", u"Error occured: This is a test error example. If something would go wrong then the user would get that information here! This should help someone understand their error and to hopefully fix or report it. ", None))
+        self.errorPlainTextEdit.setPlainText("")
         self.dropFileLabel.setText(QCoreApplication.translate("MainWindow", u"Drop Files Here", None))
         self.browsePushButton.setText(QCoreApplication.translate("MainWindow", u"Browse Files", None))
-        self.removeComboBox.setItemText(0, QCoreApplication.translate("MainWindow", u"Text.txt", None))
-        self.removeComboBox.setItemText(1, QCoreApplication.translate("MainWindow", u"MyLife.txt", None))
-        self.removeComboBox.setItemText(2, QCoreApplication.translate("MainWindow", u"Example.txt", None))
-        self.removeComboBox.setItemText(3, QCoreApplication.translate("MainWindow", u"Homework.word", None))
-
         self.removePushButton.setText(QCoreApplication.translate("MainWindow", u"Remove", None))
         self.sendPushButton.setText(QCoreApplication.translate("MainWindow", u"Send", None))
         self.procentCompletedLabel.setText(QCoreApplication.translate("MainWindow", u"0%", None))
-        self.addedFilesPlainTextEdit.setPlainText(QCoreApplication.translate("MainWindow", u"Text.txt\n"
-"Example.txt\n"
-"Homework.word\n"
-"MyLife.txt", None))
+        self.addedFilesPlainTextEdit.setPlainText("")
         self.recieverDestinationLabel.setText(QCoreApplication.translate("MainWindow", u"Destination", None))
-        self.usingIPLabel.setText(QCoreApplication.translate("MainWindow", u"Private IP: 192.168.x.x", None))
+        self.usingIPLabel.setText(QCoreApplication.translate("MainWindow", u"IP: 192.168.x.x", None))
         self.recieverPortLabel.setText(QCoreApplication.translate("MainWindow", u"Port", None))
-        self.usingPortLabel.setText(QCoreApplication.translate("MainWindow", u"Using Port: 45123", None))
-        self.StartPushButton.setText(QCoreApplication.translate("MainWindow", u"Start Reciever", None))
+        self.usingPortLabel.setText(QCoreApplication.translate("MainWindow", u"Using Port: -", None))
+        self.startPushButton.setText(QCoreApplication.translate("MainWindow", u"Start Reciever", None))
         self.downloadedLabel.setText(QCoreApplication.translate("MainWindow", u"MB Recieved: 0", None))
     # retranslateUi
 
