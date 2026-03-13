@@ -3,7 +3,7 @@ from socket import (
     AF_INET, 
     SOCK_STREAM,
     gethostbyname,
-    gethostname
+    gethostname,
     )
 from Crypto.Cipher import AES
 import os
@@ -21,9 +21,6 @@ def setUpReciever() -> tuple[socket, int]:
 
     return (serverSocket, port)
 
-def waitForFiles(serverSocket: socket) -> None:
-    pass
-
 def getUserIp() -> str:
     return gethostbyname(gethostname())
 
@@ -37,17 +34,16 @@ def senderConnect(hostName : str | int, port: int) -> socket:
     
 def sendFiles(client: socket, fileSent=None):
     for fileName in os.listdir("Sending_files/"):
-        fileSize = os.path.getsize(f"Sending_files/{fileName}")
-
         with open(f"Sending_files/{fileName}", "rb") as fh:
             data = fh.read()
 
         data = CIPHER.encrypt(data)
+        fileNameEncoded = fileName.encode()
 
-        client.send(fileName.encode())
-        client.send(str(fileSize).encode())
+        client.send(len(fileNameEncoded).to_bytes(4, "big"))
+        client.send(fileNameEncoded)
+        client.send(len(data).to_bytes(6, "big"))
         client.send(data)
-        client.send(b"<END>")
 
         if fileSent:
             fileSent(fileName)
@@ -55,14 +51,45 @@ def sendFiles(client: socket, fileSent=None):
         os.remove(f"Sending_files/{fileName}")
 
 class RecieverThread(QThread):
-    def __init__(self, serverSocket: socket):
+    def __init__(self, serverSocket: socket, statusFunc=None):
         super().__init__()
         self.running = True
+        self.connected = False
         self.serverSocket = serverSocket
+        self.serverSocket.settimeout(1.0)
 
     def run(self):
         while self.running:
-            client, addr = self.serverSocket.accept()
-            print(client, addr)
+            if not self.connected:
+                try: 
+                    client, addr = self.serverSocket.accept()
+                    self.connected = True
+                except TimeoutError:
+                    continue
+            else:
+            # Receive filename
+                nameSize = int.from_bytes(self.recvAll(client, 4), "big")
+                if not nameSize:
+                    break
+                fileName = self.recvAll(client, nameSize).decode()
+
+                # Receive file data
+                dataSize = int.from_bytes(self.recvAll(client, 6), "big")
+                data = self.recvAll(client, dataSize)
+
+                # Decrypt and save
+                data = CIPHER.decrypt(data)
+                with open(f"Received_files/{fileName}", "wb") as fh:
+                    fh.write(data)
+
+    def recvAll(self, sock: socket, size: int):
+        data = b""
+        while len(data) < size:
+            chunk = sock.recv(size - len(data))
+            if not chunk:
+                break
+            data += chunk
+        return data
+
     def stop(self):
         self.running = False

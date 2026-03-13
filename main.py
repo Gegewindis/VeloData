@@ -3,7 +3,6 @@ import os
 import shutil
 
 from PySide6.QtWidgets import QApplication, QMainWindow, QFileDialog
-from PySide6.QtCore import QThread
 from PySide6.QtGui import QIcon
 from ui_app import Ui_MainWindow
 
@@ -74,7 +73,7 @@ class MainWindow(QMainWindow):
     def connectPushButton_callback(self):
         self.ui.connectionStatusContainer.setStyleSheet("QWidget {\nbackground-color: orange;\nborder-radius: 7px\n}")
 
-        self.senderSocket = sk.senderConnect(self.ui.destinationLineEdit.text(), self.ui.portLineEdit.text())
+        self.senderSocket = sk.senderConnect(self.ui.destinationLineEdit.text(), int(self.ui.portLineEdit.text()))
         if self.senderSocket:
             self.ui.connectionStatusContainer.setStyleSheet("QWidget {\nbackground-color: rgb(0, 255, 0);\nborder-radius: 7px\n}")
         else:
@@ -116,6 +115,7 @@ class MainWindow(QMainWindow):
         self.ui.startPushButton.setText("Stop reciever")
 
         self.recieverThread = sk.RecieverThread(self.recieverSocket)
+        self.recieverThread.start()
 
 
 
