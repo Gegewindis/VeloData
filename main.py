@@ -18,7 +18,9 @@ class MainWindow(QMainWindow):
         self.senderSocket = None
         self.recieverPort = None
         self.recieverSocket = None
+
         self.recieverThread = None
+        self.senderThread = None
 
         self.recieving = False
         self.sedning = False
@@ -80,14 +82,15 @@ class MainWindow(QMainWindow):
             self.ui.connectionStatusContainer.setStyleSheet("QWidget {\nbackground-color: rgb(255, 0, 0);\nborder-radius: 7px\n}")
 
     def sendPushButton_callback(self):
-        sk.sendFiles(self.senderSocket, self.file_sent, self.sent_set_percent)
+        self.senderThread = sk.SenderThread(self.senderSocket, self.file_sent, self.sent_set_percent, self.sender_set_status)
+        self.senderThread.start()
 
     def file_sent(self, fileName):
         comboBox = self.ui.removeComboBox
         plainTextEdit = self.ui.addedFilesPlainTextEdit
 
         comboBox.removeItem(comboBox.findText(fileName))
-        
+
         plainText = plainTextEdit.toPlainText()
         plainText = plainText.split("\n")
         plainText.remove(fileName)
@@ -98,7 +101,7 @@ class MainWindow(QMainWindow):
         if self.recieving:
             self.recieverSocket.close()
             self.recieverPort = None
-            self.server_set_status("red")
+            self.reciever_set_status("red")
             self.ui.usingPortLabel.setText(f"Using Port: -")
             self.ui.startPushButton.setText("Start reciever")
             self.recieving = False
@@ -112,18 +115,21 @@ class MainWindow(QMainWindow):
 
         # Update UI
         self.ui.usingPortLabel.setText(f"Using Port: {str(self.recieverPort)}")
-        self.server_set_status("orange")
+        self.reciever_set_status("orange")
         self.ui.startPushButton.setText("Stop reciever")
 
         # Thread that recieves data
-        self.recieverThread = sk.RecieverThread(self.recieverSocket, statusFunc=self.server_set_status)
+        self.recieverThread = sk.RecieverThread(self.recieverSocket, statusFunc=self.reciever_set_status)
         self.recieverThread.start()
 
-    def server_set_status(self, color: str):
+    def reciever_set_status(self, color: str):
         self.ui.StartStatusContainer.setStyleSheet("QWidget {\nbackground-color: " + color + ";\nborder-radius: 7px\n}")
     
     def sent_set_percent(self, num: int):
         self.ui.percentCompletedLabel.setText(f"{num}%")
+
+    def sender_set_status(self, color: str):
+        self.ui.connectionStatusContainer.setStyleSheet("QWidget {\nbackground-color:" + color + ";\nborder-radius: 7px\n}")
 
 
 
@@ -136,12 +142,17 @@ if __name__ == "__main__":
     app.exec()
 
     for file in os.listdir("Sending_files/"):
-        os.remove(f"Sending_files/{file}")
+        if file != ".gitignore":
+            os.remove(f"Sending_files/{file}")
 
     if window.senderSocket:
         window.senderSocket.close()
 
     if window.recieverSocket:
         window.recieverSocket.close()
+
     if window.recieverThread:
         window.recieverThread.quit()
+
+    if window.senderThread:
+        window.senderThread.quit()

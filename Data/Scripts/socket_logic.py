@@ -35,6 +35,7 @@ def senderConnect(hostName : str | int, port: int) -> socket:
 def sendFiles(client: socket, fileSent: callable, sentProgress: callable):
     sentProgress(0)
     fileNames = os.listdir("Sending_files/")
+    fileNames.remove(".gitignore")
     for i, fileName in enumerate(fileNames):
         with open(f"Sending_files/{fileName}", "rb") as fh:
             data = fh.read()
@@ -74,7 +75,8 @@ class RecieverThread(QThread):
             # Receive filename
                 nameSize = int.from_bytes(self.recvAll(client, 4), "big")
                 if not nameSize:
-                    break
+                    self.conneced = False
+                    self.statusFunc("orange")
                 fileName = self.recvAll(client, nameSize).decode()
 
                 # Receive file data
@@ -97,3 +99,17 @@ class RecieverThread(QThread):
 
     def stop(self):
         self.running = False
+
+class SenderThread(QThread):
+    def __init__(self, client: socket, fileSent: callable, sentProgress: callable, sentStatus: callable):
+        super().__init__()
+        self.client = client
+        self.fileSent = fileSent
+        self.sentProgress = sentProgress
+        self.sentStatus = sentStatus
+
+    def run(self):
+        try:
+            sendFiles(self.client, self.fileSent, self.sentProgress)
+        except:
+            self.sentStatus("orange")
