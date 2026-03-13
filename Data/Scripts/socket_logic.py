@@ -7,7 +7,7 @@ from socket import (
     )
 from Crypto.Cipher import AES
 import os
-from PySide6.QtCore import QThread
+from PySide6.QtCore import QThread, Signal
 
 KEY = b"VeloDataTestKey1"
 NOISE = b"ThisIsSomeTstSlt"
@@ -35,7 +35,7 @@ def senderConnect(hostName : str | int, port: int) -> socket:
 def sendFiles(client: socket, fileSent: callable, sentProgress: callable):
     sentProgress(0)
     fileNames = os.listdir("Sending_files/")
-    fileNames.remove(".gitignore")
+    fileNames.remove(".gitkeep")
     for i, fileName in enumerate(fileNames):
         with open(f"Sending_files/{fileName}", "rb") as fh:
             data = fh.read()
@@ -48,19 +48,19 @@ def sendFiles(client: socket, fileSent: callable, sentProgress: callable):
         client.send(len(data).to_bytes(6, "big"))
         client.send(data)
 
-        fileSent(fileName)
-        sentProgress(i/len(fileNames))
+        fileSent.emit(fileName)
+        sentProgress.emit(i/len(fileNames))
 
         os.remove(f"Sending_files/{fileName}")
 
 class RecieverThread(QThread):
-    def __init__(self, serverSocket: socket, statusFunc: callable):
+    statusFunc = Signal(StopIteration)
+    def __init__(self, serverSocket: socket):
         super().__init__()
         self.running = True
         self.connected = False
         self.serverSocket = serverSocket
         self.serverSocket.settimeout(1.0)
-        self.statusFunc = statusFunc
 
     def run(self):
         while self.running:
@@ -68,7 +68,7 @@ class RecieverThread(QThread):
                 try: 
                     client, addr = self.serverSocket.accept()
                     self.connected = True
-                    self.statusFunc("green")
+                    self.statusFunc.emit("green")
                 except TimeoutError:
                     continue
             else:
@@ -76,17 +76,18 @@ class RecieverThread(QThread):
                 nameSize = int.from_bytes(self.recvAll(client, 4), "big")
                 if not nameSize:
                     self.conneced = False
-                    self.statusFunc("orange")
-                fileName = self.recvAll(client, nameSize).decode()
+                    self.statusFunc.emit("orange")
+                else: # If the connection is not active then don't continue
+                    fileName = self.recvAll(client, nameSize).decode()
 
-                # Receive file data
-                dataSize = int.from_bytes(self.recvAll(client, 6), "big")
-                data = self.recvAll(client, dataSize)
+                    # Receive file data
+                    dataSize = int.from_bytes(self.recvAll(client, 6), "big")
+                    data = self.recvAll(client, dataSize)
 
-                # Decrypt and save
-                data = CIPHER.decrypt(data)
-                with open(f"Recieved_files/{fileName}", "wb") as fh:
-                    fh.write(data)
+                    # Decrypt and save
+                    data = CIPHER.decrypt(data)
+                    with open(f"Recieved_files/{fileName}", "wb") as fh:
+                        fh.write(data)
 
     def recvAll(self, sock: socket, size: int):
         data = b""
@@ -101,15 +102,15 @@ class RecieverThread(QThread):
         self.running = False
 
 class SenderThread(QThread):
-    def __init__(self, client: socket, fileSent: callable, sentProgress: callable, sentStatus: callable):
+    sentStatus = Signal(str)
+    sentProgress = Signal(int)
+    fileSent = Signal(str)
+    def __init__(self, client: socket):
         super().__init__()
         self.client = client
-        self.fileSent = fileSent
-        self.sentProgress = sentProgress
-        self.sentStatus = sentStatus
 
     def run(self):
         try:
             sendFiles(self.client, self.fileSent, self.sentProgress)
         except:
-            self.sentStatus("orange")
+            self.sentProgress("orange")

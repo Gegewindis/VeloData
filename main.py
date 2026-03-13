@@ -82,7 +82,10 @@ class MainWindow(QMainWindow):
             self.ui.connectionStatusContainer.setStyleSheet("QWidget {\nbackground-color: rgb(255, 0, 0);\nborder-radius: 7px\n}")
 
     def sendPushButton_callback(self):
-        self.senderThread = sk.SenderThread(self.senderSocket, self.file_sent, self.sent_set_percent, self.sender_set_status)
+        self.senderThread = sk.SenderThread(self.senderSocket)
+        self.senderThread.fileSentSignal.connect(self.file_sent)
+        self.senderThread.progressSignal.connect(self.sent_set_percent)
+        self.senderThread.sentStatus.connect(self.sender_set_status)
         self.senderThread.start()
 
     def file_sent(self, fileName):
@@ -119,7 +122,8 @@ class MainWindow(QMainWindow):
         self.ui.startPushButton.setText("Stop reciever")
 
         # Thread that recieves data
-        self.recieverThread = sk.RecieverThread(self.recieverSocket, statusFunc=self.reciever_set_status)
+        self.recieverThread = sk.RecieverThread(self.recieverSocket)
+        self.recieverThread.statusFunc.connect(self.reciever_set_status)
         self.recieverThread.start()
 
     def reciever_set_status(self, color: str):
@@ -132,9 +136,6 @@ class MainWindow(QMainWindow):
         self.ui.connectionStatusContainer.setStyleSheet("QWidget {\nbackground-color:" + color + ";\nborder-radius: 7px\n}")
 
 
-
-
-
 if __name__ == "__main__":
     app = QApplication()
     window = MainWindow()
@@ -142,7 +143,7 @@ if __name__ == "__main__":
     app.exec()
 
     for file in os.listdir("Sending_files/"):
-        if file != ".gitignore":
+        if file != ".gitkeep":
             os.remove(f"Sending_files/{file}")
 
     if window.senderSocket:
