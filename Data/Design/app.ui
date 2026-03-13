@@ -200,7 +200,7 @@
     <item>
      <widget class="QStackedWidget" name="stackedWidget">
       <property name="currentIndex">
-       <number>1</number>
+       <number>0</number>
       </property>
       <widget class="QWidget" name="senderPage">
        <layout class="QHBoxLayout" name="horizontalLayout_11">
@@ -804,7 +804,7 @@
                   <string>Send</string>
                  </property>
                 </widget>
-                <widget class="QLabel" name="procentCompletedLabel">
+                <widget class="QLabel" name="percentCompletedLabel">
                  <property name="geometry">
                   <rect>
                    <x>260</x>

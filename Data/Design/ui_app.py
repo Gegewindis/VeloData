@@ -343,11 +343,11 @@ class Ui_MainWindow(object):
         self.sendPushButton.setFont(font1)
         self.sendPushButton.setCursor(QCursor(Qt.CursorShape.PointingHandCursor))
         self.sendPushButton.setStyleSheet(u"")
-        self.procentCompletedLabel = QLabel(self.addedFilesContainer)
-        self.procentCompletedLabel.setObjectName(u"procentCompletedLabel")
-        self.procentCompletedLabel.setGeometry(QRect(260, 280, 41, 31))
-        self.procentCompletedLabel.setFont(font1)
-        self.procentCompletedLabel.setAlignment(Qt.AlignmentFlag.AlignCenter)
+        self.percentCompletedLabel = QLabel(self.addedFilesContainer)
+        self.percentCompletedLabel.setObjectName(u"percentCompletedLabel")
+        self.percentCompletedLabel.setGeometry(QRect(260, 280, 41, 31))
+        self.percentCompletedLabel.setFont(font1)
+        self.percentCompletedLabel.setAlignment(Qt.AlignmentFlag.AlignCenter)
         self.addedFilesPlainTextEdit = QPlainTextEdit(self.addedFilesContainer)
         self.addedFilesPlainTextEdit.setObjectName(u"addedFilesPlainTextEdit")
         self.addedFilesPlainTextEdit.setGeometry(QRect(30, 40, 281, 221))
@@ -532,7 +532,7 @@ class Ui_MainWindow(object):
 
         self.retranslateUi(MainWindow)
 
-        self.stackedWidget.setCurrentIndex(1)
+        self.stackedWidget.setCurrentIndex(0)
 
 
         QMetaObject.connectSlotsByName(MainWindow)
@@ -555,13 +555,13 @@ class Ui_MainWindow(object):
         self.browsePushButton.setText(QCoreApplication.translate("MainWindow", u"Browse Files", None))
         self.removePushButton.setText(QCoreApplication.translate("MainWindow", u"Remove", None))
         self.sendPushButton.setText(QCoreApplication.translate("MainWindow", u"Send", None))
-        self.procentCompletedLabel.setText(QCoreApplication.translate("MainWindow", u"0%", None))
+        self.percentCompletedLabel.setText(QCoreApplication.translate("MainWindow", u"0%", None))
         self.addedFilesPlainTextEdit.setPlainText("")
         self.recieverDestinationLabel.setText(QCoreApplication.translate("MainWindow", u"Destination", None))
         self.usingIPLabel.setText(QCoreApplication.translate("MainWindow", u"IP: 192.168.x.x", None))
         self.recieverPortLabel.setText(QCoreApplication.translate("MainWindow", u"Port", None))
         self.usingPortLabel.setText(QCoreApplication.translate("MainWindow", u"Using Port: -", None))
-        self.startPushButton.setText(QCoreApplication.translate("MainWindow", u"Start Reciever", None))
+        self.startPushButton.setText(QCoreApplication.translate("MainWindow", u"Start reciever", None))
         self.downloadedLabel.setText(QCoreApplication.translate("MainWindow", u"MB Recieved: 0", None))
     # retranslateUi
 

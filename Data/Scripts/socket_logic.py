@@ -8,9 +8,7 @@ from socket import (
 from Crypto.Cipher import AES
 import os
 from PySide6.QtCore import QThread
-from pathlib import Path
 
-DOWNLOAD_DIR = Path.home() / "Downloads"
 KEY = b"VeloDataTestKey1"
 NOISE = b"ThisIsSomeTstSlt"
 CIPHER = AES.new(KEY, AES.MODE_EAX, NOISE)
@@ -34,8 +32,10 @@ def senderConnect(hostName : str | int, port: int) -> socket:
     except:
         return None
     
-def sendFiles(client: socket, fileSent=None):
-    for fileName in os.listdir("Sending_files/"):
+def sendFiles(client: socket, fileSent: callable, sentProgress: callable):
+    sentProgress(0)
+    fileNames = os.listdir("Sending_files/")
+    for i, fileName in enumerate(fileNames):
         with open(f"Sending_files/{fileName}", "rb") as fh:
             data = fh.read()
 
@@ -47,18 +47,19 @@ def sendFiles(client: socket, fileSent=None):
         client.send(len(data).to_bytes(6, "big"))
         client.send(data)
 
-        if fileSent:
-            fileSent(fileName)
+        fileSent(fileName)
+        sentProgress(i/len(fileNames))
 
         os.remove(f"Sending_files/{fileName}")
 
 class RecieverThread(QThread):
-    def __init__(self, serverSocket: socket, statusFunc=None):
+    def __init__(self, serverSocket: socket, statusFunc: callable):
         super().__init__()
         self.running = True
         self.connected = False
         self.serverSocket = serverSocket
         self.serverSocket.settimeout(1.0)
+        self.statusFunc = statusFunc
 
     def run(self):
         while self.running:
@@ -66,6 +67,7 @@ class RecieverThread(QThread):
                 try: 
                     client, addr = self.serverSocket.accept()
                     self.connected = True
+                    self.statusFunc("green")
                 except TimeoutError:
                     continue
             else:
@@ -81,7 +83,7 @@ class RecieverThread(QThread):
 
                 # Decrypt and save
                 data = CIPHER.decrypt(data)
-                with open(f"DOWNLOAD_DIR/{fileName}", "wb") as fh:
+                with open(f"Recieved_files/{fileName}", "wb") as fh:
                     fh.write(data)
 
     def recvAll(self, sock: socket, size: int):

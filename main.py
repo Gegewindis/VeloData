@@ -4,7 +4,7 @@ import shutil
 
 from PySide6.QtWidgets import QApplication, QMainWindow, QFileDialog
 from PySide6.QtGui import QIcon
-from ui_app import Ui_MainWindow
+from Data.Design.ui_app import Ui_MainWindow
 
 class MainWindow(QMainWindow):
     def __init__(self):
@@ -80,7 +80,7 @@ class MainWindow(QMainWindow):
             self.ui.connectionStatusContainer.setStyleSheet("QWidget {\nbackground-color: rgb(255, 0, 0);\nborder-radius: 7px\n}")
 
     def sendPushButton_callback(self):
-        sk.sendFiles(self.senderSocket, fileSent=self.file_sent)
+        sk.sendFiles(self.senderSocket, self.file_sent, self.sent_set_percent)
 
     def file_sent(self, fileName):
         comboBox = self.ui.removeComboBox
@@ -98,7 +98,7 @@ class MainWindow(QMainWindow):
         if self.recieving:
             self.recieverSocket.close()
             self.recieverPort = None
-            self.ui.StartStatusContainer.setStyleSheet("QWidget {\nbackground-color: rgb(255, 0, 0);\nborder-radius: 7px\n}")
+            self.server_set_status("red")
             self.ui.usingPortLabel.setText(f"Using Port: -")
             self.ui.startPushButton.setText("Start reciever")
             self.recieving = False
@@ -106,16 +106,24 @@ class MainWindow(QMainWindow):
             self.recieverThread = None
             return
         
+        # Setup
         self.recieving = True
         self.recieverSocket, self.recieverPort = sk.setUpReciever()
 
         # Update UI
         self.ui.usingPortLabel.setText(f"Using Port: {str(self.recieverPort)}")
-        self.ui.StartStatusContainer.setStyleSheet("QWidget {\nbackground-color: orange;\nborder-radius: 7px\n}")
+        self.server_set_status("orange")
         self.ui.startPushButton.setText("Stop reciever")
 
-        self.recieverThread = sk.RecieverThread(self.recieverSocket)
+        # Thread that recieves data
+        self.recieverThread = sk.RecieverThread(self.recieverSocket, statusFunc=self.server_set_status)
         self.recieverThread.start()
+
+    def server_set_status(self, color: str):
+        self.ui.StartStatusContainer.setStyleSheet("QWidget {\nbackground-color: " + color + ";\nborder-radius: 7px\n}")
+    
+    def sent_set_percent(self, num: int):
+        self.ui.percentCompletedLabel.setText(f"{num}%")
 
 
 
