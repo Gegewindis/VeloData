@@ -200,7 +200,7 @@
     <item>
      <widget class="QStackedWidget" name="stackedWidget">
       <property name="currentIndex">
-       <number>0</number>
+       <number>1</number>
       </property>
       <widget class="QWidget" name="senderPage">
        <layout class="QHBoxLayout" name="horizontalLayout_11">
@@ -819,7 +819,7 @@
                   </font>
                  </property>
                  <property name="text">
-                  <string>0%</string>
+                  <string>0/0</string>
                  </property>
                  <property name="alignment">
                   <set>Qt::AlignmentFlag::AlignCenter</set>
@@ -1213,7 +1213,7 @@
               </font>
              </property>
              <property name="text">
-              <string>MB Recieved: 0</string>
+              <string>KB Recieved: 0</string>
              </property>
              <property name="alignment">
               <set>Qt::AlignmentFlag::AlignCenter</set>

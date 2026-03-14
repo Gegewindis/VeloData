@@ -532,7 +532,7 @@ class Ui_MainWindow(object):
 
         self.retranslateUi(MainWindow)
 
-        self.stackedWidget.setCurrentIndex(0)
+        self.stackedWidget.setCurrentIndex(1)
 
 
         QMetaObject.connectSlotsByName(MainWindow)
@@ -555,13 +555,13 @@ class Ui_MainWindow(object):
         self.browsePushButton.setText(QCoreApplication.translate("MainWindow", u"Browse Files", None))
         self.removePushButton.setText(QCoreApplication.translate("MainWindow", u"Remove", None))
         self.sendPushButton.setText(QCoreApplication.translate("MainWindow", u"Send", None))
-        self.percentCompletedLabel.setText(QCoreApplication.translate("MainWindow", u"0%", None))
+        self.percentCompletedLabel.setText(QCoreApplication.translate("MainWindow", u"0/0", None))
         self.addedFilesPlainTextEdit.setPlainText("")
         self.recieverDestinationLabel.setText(QCoreApplication.translate("MainWindow", u"Destination", None))
         self.usingIPLabel.setText(QCoreApplication.translate("MainWindow", u"IP: 192.168.x.x", None))
         self.recieverPortLabel.setText(QCoreApplication.translate("MainWindow", u"Port", None))
         self.usingPortLabel.setText(QCoreApplication.translate("MainWindow", u"Using Port: -", None))
         self.startPushButton.setText(QCoreApplication.translate("MainWindow", u"Start reciever", None))
-        self.downloadedLabel.setText(QCoreApplication.translate("MainWindow", u"MB Recieved: 0", None))
+        self.downloadedLabel.setText(QCoreApplication.translate("MainWindow", u"KB Recieved: 0", None))
     # retranslateUi
 

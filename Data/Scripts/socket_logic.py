@@ -33,9 +33,9 @@ def senderConnect(hostName : str | int, port: int) -> socket:
         return None
     
 def sendFiles(client: socket, removeFile: callable, sentProgress: callable):
-    sentProgress.emit(0)
     fileNames = os.listdir("Sending_files/")
     fileNames.remove(".gitkeep")
+    sentProgress.emit(f"0/{len(fileNames)}")
     for i, fileName in enumerate(fileNames):
         with open(f"Sending_files/{fileName}", "rb") as fh:
             data = fh.read()
@@ -49,43 +49,49 @@ def sendFiles(client: socket, removeFile: callable, sentProgress: callable):
         client.send(data)
 
         removeFile.emit(fileName)
-        sentProgress.emit(int(i/len(fileNames)))
+        sentProgress.emit(f"{str(i + 1)}/{str(len(fileNames))}")
 
 class RecieverThread(QThread):
     statusFunc = Signal(str)
+    downloadFunc = Signal(int)
     def __init__(self, serverSocket: socket):
         super().__init__()
         self.running = True
         self.connected = False
         self.serverSocket = serverSocket
         self.serverSocket.settimeout(1.0)
+        self.client = None
 
     def run(self):
         while self.running:
             if not self.connected:
                 try: 
-                    client, addr = self.serverSocket.accept()
+                    self.client, addr = self.serverSocket.accept()
                     self.connected = True
                     self.statusFunc.emit("green")
                 except TimeoutError:
                     continue
             else:
-            # Receive filename
-                nameSize = int.from_bytes(self.recvAll(client, 4), "big")
-                if not nameSize:
-                    self.connected = False
-                    self.statusFunc.emit("orange")
-                else: # If the connection is not active then don't continue
-                    fileName = self.recvAll(client, nameSize).decode()
+                try:
+                    # Receive filename
+                    nameSize = int.from_bytes(self.recvAll(self.client, 4), "big")
+                    if not nameSize:
+                        self.connected = False
+                        self.statusFunc.emit("orange")
+                    else: # If the connection is not active then don't continue
+                        fileName = self.recvAll(self.client, nameSize).decode()
 
-                    # Receive file data
-                    dataSize = int.from_bytes(self.recvAll(client, 6), "big")
-                    data = self.recvAll(client, dataSize)
+                        # Receive file data
+                        dataSize = int.from_bytes(self.recvAll(self.client, 6), "big")
+                        data = self.recvAll(self.client, dataSize)
 
-                    # Decrypt and save
-                    data = CIPHER.decrypt(data)
-                    with open(f"Recieved_files/{fileName}", "wb") as fh:
-                        fh.write(data)
+                        # Decrypt and save
+                        data = CIPHER.decrypt(data)
+                        with open(f"Recieved_files/{fileName}", "wb") as fh:
+                            fh.write(data)
+                        self.downloadFunc.emit(int(len(data)/1000))
+                except ConnectionAbortedError:
+                    continue
 
     def recvAll(self, sock: socket, size: int):
         data = b""
@@ -98,10 +104,13 @@ class RecieverThread(QThread):
 
     def stop(self):
         self.running = False
+        if self.client:
+            self.client.close()
+            self.cleint = None
 
 class SenderThread(QThread):
     sentStatus = Signal(str)
-    sentProgress = Signal(int)
+    sentProgress = Signal(str)
     removeFile = Signal(str)
     def __init__(self, client: socket):
         super().__init__()

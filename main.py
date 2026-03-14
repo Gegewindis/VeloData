@@ -24,6 +24,8 @@ class MainWindow(QMainWindow):
 
         self.recieving = False
         self.sending = False
+        
+        self.downloaded = 0
 
         # Button Events
         self.ui.senderPushButton.clicked.connect(self.senderPushButton_callback)
@@ -63,6 +65,7 @@ class MainWindow(QMainWindow):
             self.senderSocket.close()
             self.senderSocket = None
             self.sender_set_status("red")
+            self.ui.connectPushButton.setText("Connect")
             self.sending = False
             return
 
@@ -76,23 +79,29 @@ class MainWindow(QMainWindow):
             self.sender_set_status("red")
 
     def sendPushButton_callback(self):
+        self.ui.sendPushButton.setEnabled(False)
         self.senderThread = sk.SenderThread(self.senderSocket)
         self.senderThread.removeFile.connect(self.remove_file)
         self.senderThread.sentProgress.connect(self.sent_set_progress)
         self.senderThread.sentStatus.connect(self.sender_set_status)
+        self.senderThread.finished.connect(lambda: self.ui.sendPushButton.setEnabled(True))
         self.senderThread.start()
 
     def StartPushButton_callback(self):
         if self.recieving:
+            self.recieverThread.stop()
+            self.recieverThread.wait()
+            self.recieverThread = None
+
             self.recieverSocket.close()
             self.recieverSocket = None
-            self.recieverPort = None
+
             self.reciever_set_status("red")
             self.ui.usingPortLabel.setText(f"Using Port: -")
             self.ui.startPushButton.setText("Start reciever")
+
             self.recieving = False
-            self.recieverThread.quit()
-            self.recieverThread = None
+            self.recieverPort = None
             return
         
         # Setup
@@ -107,6 +116,7 @@ class MainWindow(QMainWindow):
         # Reciever thread
         self.recieverThread = sk.RecieverThread(self.recieverSocket)
         self.recieverThread.statusFunc.connect(self.reciever_set_status)
+        self.recieverThread.downloadFunc.connect(self.set_downloaded)
         self.recieverThread.start()
 
     # Other methods
@@ -127,11 +137,21 @@ class MainWindow(QMainWindow):
     def reciever_set_status(self, color: str) -> None:
         self.ui.StartStatusContainer.setStyleSheet("QWidget {\nbackground-color: " + color + ";\nborder-radius: 7px\n}")
     
-    def sent_set_progress(self, num: int) -> None:
-        self.ui.percentCompletedLabel.setText(f"{num}%")
+    def sent_set_progress(self, progress: str) -> None:
+        self.ui.percentCompletedLabel.setText(progress)
 
     def sender_set_status(self, color: str) -> None:
         self.ui.connectionStatusContainer.setStyleSheet("QWidget {\nbackground-color:" + color + ";\nborder-radius: 7px\n}")
+
+    def set_downloaded(self, amount: int):
+        self.downloaded += amount
+
+        if self.downloaded < 1000:
+            self.ui.downloadedLabel.setText(f"KB Recieved: {self.downloaded}")
+        elif self.downloaded < 1000000:
+            self.ui.downloadedLabel.setText(f"MB Recieved: {int(self.downloaded/1000)}")
+        else:
+            self.ui.downloadedLabel.setText(f"GB Recieved: {int(self.downloaded/1000000)}")
 
     def on_dropped_file(self, fileName: str) -> None:
         self.ui.removeComboBox.addItem(fileName)
@@ -150,13 +170,11 @@ class MainWindow(QMainWindow):
             window.recieverSocket.close()
 
         if window.recieverThread:
-            window.recieverThread.quit()
+            window.recieverThread.stop()
             window.recieverThread.wait()
 
         if window.senderThread:
-            window.senderThread.quit()
             window.senderThread.wait()
-
 
         return super().closeEvent(event)
 
