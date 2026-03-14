@@ -32,7 +32,7 @@ def senderConnect(hostName : str | int, port: int) -> socket:
     except:
         return None
     
-def sendFiles(client: socket, fileSent: callable, sentProgress: callable):
+def sendFiles(client: socket, removeFile: callable, sentProgress: callable):
     sentProgress.emit(0)
     fileNames = os.listdir("Sending_files/")
     fileNames.remove(".gitkeep")
@@ -48,10 +48,8 @@ def sendFiles(client: socket, fileSent: callable, sentProgress: callable):
         client.send(len(data).to_bytes(6, "big"))
         client.send(data)
 
-        fileSent.emit(fileName)
+        removeFile.emit(fileName)
         sentProgress.emit(int(i/len(fileNames)))
-
-        os.remove(f"Sending_files/{fileName}")
 
 class RecieverThread(QThread):
     statusFunc = Signal(str)
@@ -104,13 +102,13 @@ class RecieverThread(QThread):
 class SenderThread(QThread):
     sentStatus = Signal(str)
     sentProgress = Signal(int)
-    fileSent = Signal(str)
+    removeFile = Signal(str)
     def __init__(self, client: socket):
         super().__init__()
         self.client = client
 
     def run(self):
         try:
-            sendFiles(self.client, self.fileSent, self.sentProgress)
+            sendFiles(self.client, self.removeFile, self.sentProgress)
         except:
             self.sentStatus.emit("orange")

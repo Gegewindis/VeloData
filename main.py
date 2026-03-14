@@ -23,7 +23,7 @@ class MainWindow(QMainWindow):
         self.senderThread = None
 
         self.recieving = False
-        self.sedning = False
+        self.sending = False
 
         # Button Events
         self.ui.senderPushButton.clicked.connect(self.senderPushButton_callback)
@@ -38,6 +38,7 @@ class MainWindow(QMainWindow):
         self.ui.usingIPLabel.setText(f"IP: {sk.getUserIp()}")
         self.ui.dropFileLabel.fileDropped.connect(self.on_dropped_file)
 
+    # Callback methods
     def senderPushButton_callback(self):
         self.ui.stackedWidget.setCurrentIndex(0)
 
@@ -45,24 +46,9 @@ class MainWindow(QMainWindow):
         self.ui.stackedWidget.setCurrentIndex(1)
 
     def removePushButton_callback(self):
-        comboBox = self.ui.removeComboBox
-        plainTextEdit = self.ui.addedFilesPlainTextEdit
-
-        fileName = comboBox.currentText()
-        comboBox.removeItem(comboBox.findText(fileName))
+        fileName = self.ui.removeComboBox.currentText()
+        self.remove_file(fileName)
         
-        plainText = plainTextEdit.toPlainText()
-        plainText = plainText.split("\n")
-        plainText.remove(fileName)
-        plainText = "\n".join(plainText)
-        plainTextEdit.setPlainText(plainText)
-
-        os.remove(f"Sending_files/{fileName}")
-
-    def on_dropped_file(self, fileName):
-        self.ui.removeComboBox.addItem(fileName)
-        self.ui.addedFilesPlainTextEdit.insertPlainText(fileName + "\n")
-
     def browsePushButton_callback(self):
         filePath, _ = QFileDialog.getOpenFileName(self, "Select File")
         if filePath:
@@ -73,36 +59,33 @@ class MainWindow(QMainWindow):
             self.ui.addedFilesPlainTextEdit.insertPlainText(fileName + "\n")
 
     def connectPushButton_callback(self):
-        self.ui.connectionStatusContainer.setStyleSheet("QWidget {\nbackground-color: orange;\nborder-radius: 7px\n}")
+        if self.sending:
+            self.senderSocket.close()
+            self.senderSocket = None
+            self.sender_set_status("red")
+            self.sending = False
+            return
 
+        self.sender_set_status("orange")
         self.senderSocket = sk.senderConnect(self.ui.destinationLineEdit.text(), int(self.ui.portLineEdit.text()))
         if self.senderSocket:
-            self.ui.connectionStatusContainer.setStyleSheet("QWidget {\nbackground-color: rgb(0, 255, 0);\nborder-radius: 7px\n}")
+            self.sender_set_status("green")
+            self.ui.connectPushButton.setText("Disconnect")
+            self.sending = True
         else:
-            self.ui.connectionStatusContainer.setStyleSheet("QWidget {\nbackground-color: rgb(255, 0, 0);\nborder-radius: 7px\n}")
+            self.sender_set_status("red")
 
     def sendPushButton_callback(self):
         self.senderThread = sk.SenderThread(self.senderSocket)
-        self.senderThread.fileSent.connect(self.file_sent)
-        self.senderThread.sentProgress.connect(self.sent_set_percent)
+        self.senderThread.removeFile.connect(self.remove_file)
+        self.senderThread.sentProgress.connect(self.sent_set_progress)
         self.senderThread.sentStatus.connect(self.sender_set_status)
         self.senderThread.start()
-
-    def file_sent(self, fileName):
-        comboBox = self.ui.removeComboBox
-        plainTextEdit = self.ui.addedFilesPlainTextEdit
-
-        comboBox.removeItem(comboBox.findText(fileName))
-
-        plainText = plainTextEdit.toPlainText()
-        plainText = plainText.split("\n")
-        plainText.remove(fileName)
-        plainText = "\n".join(plainText)
-        plainTextEdit.setPlainText(plainText)
 
     def StartPushButton_callback(self):
         if self.recieving:
             self.recieverSocket.close()
+            self.recieverSocket = None
             self.recieverPort = None
             self.reciever_set_status("red")
             self.ui.usingPortLabel.setText(f"Using Port: -")
@@ -121,19 +104,61 @@ class MainWindow(QMainWindow):
         self.reciever_set_status("orange")
         self.ui.startPushButton.setText("Stop reciever")
 
-        # Thread that recieves data
+        # Reciever thread
         self.recieverThread = sk.RecieverThread(self.recieverSocket)
         self.recieverThread.statusFunc.connect(self.reciever_set_status)
         self.recieverThread.start()
 
-    def reciever_set_status(self, color: str):
+    # Other methods
+    def remove_file(self, fileName: str) -> None:
+        # Removes it from the folder
+        os.remove(f"Sending_files/{fileName}")
+
+        # Removes the selected comboBox alternative
+        self.ui.removeComboBox.removeItem(self.ui.removeComboBox.findText(fileName))
+
+        # Removes the file from the plainTextEdit
+        plainText = self.ui.addedFilesPlainTextEdit.toPlainText()
+        plainText = plainText.split("\n")
+        plainText.remove(fileName)
+        plainText = "\n".join(plainText)
+        self.ui.addedFilesPlainTextEdit.setPlainText(plainText)
+
+    def reciever_set_status(self, color: str) -> None:
         self.ui.StartStatusContainer.setStyleSheet("QWidget {\nbackground-color: " + color + ";\nborder-radius: 7px\n}")
     
-    def sent_set_percent(self, num: int):
+    def sent_set_progress(self, num: int) -> None:
         self.ui.percentCompletedLabel.setText(f"{num}%")
 
-    def sender_set_status(self, color: str):
+    def sender_set_status(self, color: str) -> None:
         self.ui.connectionStatusContainer.setStyleSheet("QWidget {\nbackground-color:" + color + ";\nborder-radius: 7px\n}")
+
+    def on_dropped_file(self, fileName: str) -> None:
+        self.ui.removeComboBox.addItem(fileName)
+        self.ui.addedFilesPlainTextEdit.insertPlainText(fileName + "\n")
+
+    # Cleanup method
+    def closeEvent(self, event):
+        for fileName in os.listdir("Sending_files/"):
+            if fileName != ".gitkeep":
+                os.remove(f"Sending_files/{fileName}")
+
+        if window.senderSocket:
+            window.senderSocket.close()
+
+        if window.recieverSocket:
+            window.recieverSocket.close()
+
+        if window.recieverThread:
+            window.recieverThread.quit()
+            window.recieverThread.wait()
+
+        if window.senderThread:
+            window.senderThread.quit()
+            window.senderThread.wait()
+
+
+        return super().closeEvent(event)
 
 
 if __name__ == "__main__":
@@ -141,21 +166,3 @@ if __name__ == "__main__":
     window = MainWindow()
     window.show()
     app.exec()
-
-    for file in os.listdir("Sending_files/"):
-        if file != ".gitkeep":
-            os.remove(f"Sending_files/{file}")
-
-    if window.senderSocket:
-        window.senderSocket.close()
-
-    if window.recieverSocket:
-        window.recieverSocket.close()
-
-    if window.recieverThread:
-        window.recieverThread.quit()
-        window.recieverThread.wait()
-
-    if window.senderThread:
-        window.senderThread.quit()
-        window.senderThread.wait()
