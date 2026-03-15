@@ -90,8 +90,8 @@ class RecieverThread(QThread):
                         with open(f"Recieved_files/{fileName}", "wb") as fh:
                             fh.write(data)
                         self.downloadFunc.emit(int(len(data)/1000))
-                except ConnectionAbortedError:
-                    continue
+                except (ConnectionAbortedError, ConnectionResetError) as e:
+                    pass
 
     def recvAll(self, sock: socket, size: int):
         data = b""

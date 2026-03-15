@@ -15,15 +15,17 @@ class MainWindow(QMainWindow):
         self.setWindowTitle("VeloData")
         self.setWindowIcon(QIcon("Data/Images/icon.png"))
 
-        self.senderSocket = None
+        # Reciever
         self.recieverSocket = None
-
         self.recieverThread = None
-        self.senderThread = None
-
         self.recieving = False
+
+        # Sender
+        self.senderSocket = None
+        self.senderThread = None
         self.sending = False
-        
+
+        # Other attributes
         self.downloaded = 0
 
         # Button Events
@@ -60,8 +62,8 @@ class MainWindow(QMainWindow):
             self.ui.addedFilesPlainTextEdit.insertPlainText(fileName + "\n")
 
     def connectPushButton_callback(self):
-        # Reset
         if self.sending:
+            # Reset
             self.senderSocket.close()
             self.senderSocket = None
             self.sending = False
@@ -87,7 +89,7 @@ class MainWindow(QMainWindow):
         
         # Tries connecting
         self.set_sender_status("orange")
-        self.senderSocket = sk.senderConnect(hostname, port)
+        self.senderSocket = sk.senderConnect(hostname, int(port))
 
         if self.senderSocket:
             self.sending = True
