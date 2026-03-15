@@ -31,7 +31,7 @@ Make sure to have the following python modules installed for the server to work 
 ## :vertical_traffic_light: Setting up DB and running API
 1. Clone the repository to your local machine.
 2. Setup the key and nonce in the ```Data/Scripts/socket_logic.py```. Keep in mind that they both have to be a string of 16 char.
-3. Run ```main.py```
+3. Run ```main.py```.
 
 
 
