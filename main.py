@@ -1,4 +1,4 @@
-import Data.Scripts.socket_logic as sk
+import Data.Scripts.socket_logic as SL
 import os
 import shutil
 
@@ -36,7 +36,7 @@ class MainWindow(QMainWindow):
         self.ui.startPushButton.clicked.connect(self.startPushButton_callback)
 
         # Labels
-        self.ui.usingIPLabel.setText(f"IP: {sk.getUserIp()}")
+        self.ui.usingIPLabel.setText(f"IP: {SL.getUserIp()}")
         self.ui.dropFileLabel.fileDropped.connect(self.on_dropped_file)
 
     # Callback methods
@@ -71,7 +71,7 @@ class MainWindow(QMainWindow):
             self.ui.recieverPushButton.setEnabled(True)
             return
         
-        # Disables swtiching page
+        # Disables page switching
         self.ui.recieverPushButton.setEnabled(False)
 
         # Error check
@@ -86,27 +86,27 @@ class MainWindow(QMainWindow):
         
         # Tries connecting
         self.set_sender_status("orange")
-        self.senderSocket = sk.senderConnect(hostname, int(port))
+        self.senderSocket = SL.senderConnect(hostname, int(port))
 
         if self.senderSocket:
-            # UI changes
+            # Update UI
             self.ui.senderInfoPlainTextEdit.setPlainText("")
             self.ui.connectPushButton.setText("Disconnect")
             self.set_sender_status("green")
 
         else:
-            #UI changes
+            # Update UI
             self.ui.senderInfoPlainTextEdit.setPlainText("Connection failed, make sure to have the right IP address and port that the reciever uses.\n\nKeep in mind the the current version can only handle datatransfers on the same local network!")
             self.set_sender_status("red")
 
-            # Emable page switch in case of fail
+            # Enable page switch in case of fail
             self.ui.recieverDestinationContainer.setEnabled(True)
 
     def sendPushButton_callback(self):
         if not self.senderSocket:
             return
         self.ui.sendPushButton.setEnabled(False)
-        self.senderThread = sk.SenderThread(self.senderSocket)
+        self.senderThread = SL.SenderThread(self.senderSocket)
         self.senderThread.removeFile.connect(self.remove_file)
         self.senderThread.sentProgress.connect(self.set_sent_progress)
         self.senderThread.sentStatus.connect(self.set_sender_status)
@@ -115,17 +115,17 @@ class MainWindow(QMainWindow):
 
     def startPushButton_callback(self):
         if self.recieverSocket:
+            # Reset
             self.recieverThread.stop()
             self.recieverThread.wait()
             self.recieverThread = None
-
             self.recieverSocket.close()
             self.recieverSocket = None
 
+            # UI reset
             self.set_reciever_status("red")
             self.ui.usingPortLabel.setText(f"Using Port: -")
             self.ui.startPushButton.setText("Start reciever")
-
             self.ui.senderPushButton.setEnabled(True)
             return
         
@@ -133,7 +133,7 @@ class MainWindow(QMainWindow):
         self.ui.senderPushButton.setEnabled(False)
 
         # Setup
-        self.recieverSocket, recieverPort = sk.setUpReciever()
+        self.recieverSocket, recieverPort = SL.setUpReciever()
 
         # Update UI
         self.ui.usingPortLabel.setText(f"Using Port: {str(recieverPort)}")
@@ -141,7 +141,7 @@ class MainWindow(QMainWindow):
         self.ui.startPushButton.setText("Stop reciever")
 
         # Reciever thread
-        self.recieverThread = sk.RecieverThread(self.recieverSocket)
+        self.recieverThread = SL.RecieverThread(self.recieverSocket)
         self.recieverThread.statusFunc.connect(self.set_reciever_status)
         self.recieverThread.downloadFunc.connect(self.set_downloaded)
         self.recieverThread.start()
@@ -162,9 +162,9 @@ class MainWindow(QMainWindow):
         if self.downloaded < 1000:
             self.ui.downloadedLabel.setText(f"KB Recieved: {self.downloaded}")
         elif self.downloaded < 1000000:
-            self.ui.downloadedLabel.setText(f"MB Recieved: {int(self.downloaded/1000)}")
+            self.ui.downloadedLabel.setText(f"MB Recieved: {self.downloaded/1000:.2f}")
         else:
-            self.ui.downloadedLabel.setText(f"GB Recieved: {int(self.downloaded/1000000)}")
+            self.ui.downloadedLabel.setText(f"GB Recieved: {self.downloaded/1000000:.2f}")
 
     def remove_file(self, fileName: str) -> None:
         # Removes it from the folder
