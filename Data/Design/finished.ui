@@ -602,7 +602,7 @@
             <number>0</number>
            </property>
            <item>
-            <widget class="QPlainTextEdit" name="errorPlainTextEdit">
+            <widget class="QPlainTextEdit" name="senderInfoPlainTextEdit">
              <property name="sizePolicy">
               <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
                <horstretch>0</horstretch>
@@ -624,7 +624,7 @@
              <property name="styleSheet">
               <string notr="true">QPlainTextEdit {
 	
-	color: rgb(149, 0, 2)
+	color: rgb(255, 255, 255)
 }</string>
              </property>
              <property name="lineWrapMode">

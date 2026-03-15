@@ -34,7 +34,7 @@ class MainWindow(QMainWindow):
         self.ui.browsePushButton.clicked.connect(self.browsePushButton_callback)
         self.ui.sendPushButton.clicked.connect(self.sendPushButton_callback)
         self.ui.connectPushButton.clicked.connect(self.connectPushButton_callback)
-        self.ui.startPushButton.clicked.connect(self.StartPushButton_callback)
+        self.ui.startPushButton.clicked.connect(self.startPushButton_callback)
 
         # Labels
         self.ui.usingIPLabel.setText(f"IP: {sk.getUserIp()}")
@@ -61,22 +61,50 @@ class MainWindow(QMainWindow):
             self.ui.addedFilesPlainTextEdit.insertPlainText(fileName + "\n")
 
     def connectPushButton_callback(self):
+        # Reset
         if self.sending:
             self.senderSocket.close()
             self.senderSocket = None
+            self.sending = False
+
+            # UI reset
             self.sender_set_status("red")
             self.ui.connectPushButton.setText("Connect")
-            self.sending = False
+            self.ui.recieverPushButton.setEnabled(True)
             return
+        
+        # Disables swtiching page
+        self.ui.recieverPushButton.setEnabled(False)
 
+        # Error check
+        if (hostname := self.ui.destinationLineEdit.text()) == "":
+            self.ui.senderInfoPlainTextEdit.setPlainText("Please fill out the 'destination' field!")
+            self.ui.recieverPushButton.setEnabled(True)
+            return
+        if (port := self.ui.portLineEdit.text()) == "":
+            self.ui.senderInfoPlainTextEdit.setPlainText("Please fill out the 'port' field!")
+            self.ui.recieverPushButton.setEnabled(True)
+            return
+        
+        # Tries connecting
         self.sender_set_status("orange")
-        self.senderSocket = sk.senderConnect(self.ui.destinationLineEdit.text(), int(self.ui.portLineEdit.text()))
+        self.senderSocket = sk.senderConnect(hostname, port)
+
         if self.senderSocket:
-            self.sender_set_status("green")
-            self.ui.connectPushButton.setText("Disconnect")
             self.sending = True
+
+            # UI changes
+            self.ui.senderInfoPlainTextEdit.setPlainText("")
+            self.ui.connectPushButton.setText("Disconnect")
+            self.sender_set_status("green")
+
         else:
+            #UI changes
+            self.ui.senderInfoPlainTextEdit.setPlainText("Connection failed, make sure to have the right IP address and port that the reciever uses.\n\nKeep in mind the the current version can only handle datatransfers on the same local network!")
             self.sender_set_status("red")
+
+            # Emable page switch in case of fail
+            self.ui.recieverDestinationContainer.setEnabled(True)
 
     def sendPushButton_callback(self):
         if not self.sending:
@@ -89,7 +117,7 @@ class MainWindow(QMainWindow):
         self.senderThread.finished.connect(lambda: self.ui.sendPushButton.setEnabled(True))
         self.senderThread.start()
 
-    def StartPushButton_callback(self):
+    def startPushButton_callback(self):
         if self.recieving:
             self.recieverThread.stop()
             self.recieverThread.wait()
@@ -104,8 +132,13 @@ class MainWindow(QMainWindow):
 
             self.recieving = False
             self.recieverPort = None
+
+            self.ui.senderPushButton.setEnabled(True)
             return
         
+        # Disable page switching
+        self.ui.senderPushButton.setEnabled(False)
+
         # Setup
         self.recieving = True
         self.recieverSocket, self.recieverPort = sk.setUpReciever()

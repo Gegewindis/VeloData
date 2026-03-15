@@ -277,26 +277,26 @@ class Ui_MainWindow(object):
         self.verticalLayout_11 = QVBoxLayout(self.senderMainContainer)
         self.verticalLayout_11.setObjectName(u"verticalLayout_11")
         self.verticalLayout_11.setContentsMargins(0, 0, 0, 0)
-        self.errorPlainTextEdit = QPlainTextEdit(self.senderMainContainer)
-        self.errorPlainTextEdit.setObjectName(u"errorPlainTextEdit")
+        self.senderInfoPlainTextEdit = QPlainTextEdit(self.senderMainContainer)
+        self.senderInfoPlainTextEdit.setObjectName(u"senderInfoPlainTextEdit")
         sizePolicy2 = QSizePolicy(QSizePolicy.Policy.Expanding, QSizePolicy.Policy.Expanding)
         sizePolicy2.setHorizontalStretch(0)
         sizePolicy2.setVerticalStretch(0)
-        sizePolicy2.setHeightForWidth(self.errorPlainTextEdit.sizePolicy().hasHeightForWidth())
-        self.errorPlainTextEdit.setSizePolicy(sizePolicy2)
-        self.errorPlainTextEdit.setMinimumSize(QSize(0, 100))
+        sizePolicy2.setHeightForWidth(self.senderInfoPlainTextEdit.sizePolicy().hasHeightForWidth())
+        self.senderInfoPlainTextEdit.setSizePolicy(sizePolicy2)
+        self.senderInfoPlainTextEdit.setMinimumSize(QSize(0, 100))
         font3 = QFont()
         font3.setPointSize(14)
         font3.setItalic(True)
-        self.errorPlainTextEdit.setFont(font3)
-        self.errorPlainTextEdit.setStyleSheet(u"QPlainTextEdit {\n"
+        self.senderInfoPlainTextEdit.setFont(font3)
+        self.senderInfoPlainTextEdit.setStyleSheet(u"QPlainTextEdit {\n"
 "	\n"
-"	color: rgb(149, 0, 2)\n"
+"	color: rgb(255, 255, 255)\n"
 "}")
-        self.errorPlainTextEdit.setLineWrapMode(QPlainTextEdit.LineWrapMode.WidgetWidth)
-        self.errorPlainTextEdit.setReadOnly(True)
+        self.senderInfoPlainTextEdit.setLineWrapMode(QPlainTextEdit.LineWrapMode.WidgetWidth)
+        self.senderInfoPlainTextEdit.setReadOnly(True)
 
-        self.verticalLayout_11.addWidget(self.errorPlainTextEdit)
+        self.verticalLayout_11.addWidget(self.senderInfoPlainTextEdit)
 
         self.verticalSpacer_4 = QSpacerItem(20, 289, QSizePolicy.Policy.Minimum, QSizePolicy.Policy.Expanding)
 
@@ -694,7 +694,7 @@ class Ui_MainWindow(object):
         self.portLineEdit.setText("")
         self.portLineEdit.setPlaceholderText(QCoreApplication.translate("MainWindow", u"Recieving port", None))
         self.connectPushButton.setText(QCoreApplication.translate("MainWindow", u"Connect", None))
-        self.errorPlainTextEdit.setPlainText("")
+        self.senderInfoPlainTextEdit.setPlainText("")
         self.browsePushButton.setText(QCoreApplication.translate("MainWindow", u"Browse Files", None))
         self.removePushButton.setText(QCoreApplication.translate("MainWindow", u"Remove", None))
         self.dropFileLabel.setText(QCoreApplication.translate("MainWindow", u"Drop Files Here", None))
