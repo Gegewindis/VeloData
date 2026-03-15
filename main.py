@@ -4,7 +4,7 @@ import shutil
 
 from PySide6.QtWidgets import QApplication, QMainWindow, QFileDialog
 from PySide6.QtGui import QIcon
-from Data.Design.ui_app import Ui_MainWindow
+from Data.Design.ui import Ui_MainWindow
 
 class MainWindow(QMainWindow):
     def __init__(self):
@@ -79,6 +79,8 @@ class MainWindow(QMainWindow):
             self.sender_set_status("red")
 
     def sendPushButton_callback(self):
+        if not self.sending:
+            return
         self.ui.sendPushButton.setEnabled(False)
         self.senderThread = sk.SenderThread(self.senderSocket)
         self.senderThread.removeFile.connect(self.remove_file)

@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 
 ################################################################################
-## Form generated from reading UI file 'app.ui'
+## Form generated from reading UI file 'finished.ui'
 ##
 ## Created by: Qt User Interface Compiler version 6.10.2
 ##
@@ -112,8 +112,13 @@ class Ui_MainWindow(object):
         self.horizontalLayout_11.setContentsMargins(0, 0, 0, 0)
         self.menuContainer = QFrame(self.senderPage)
         self.menuContainer.setObjectName(u"menuContainer")
+        sizePolicy = QSizePolicy(QSizePolicy.Policy.MinimumExpanding, QSizePolicy.Policy.Preferred)
+        sizePolicy.setHorizontalStretch(0)
+        sizePolicy.setVerticalStretch(0)
+        sizePolicy.setHeightForWidth(self.menuContainer.sizePolicy().hasHeightForWidth())
+        self.menuContainer.setSizePolicy(sizePolicy)
         self.menuContainer.setMinimumSize(QSize(250, 0))
-        self.menuContainer.setMaximumSize(QSize(250, 16777215))
+        self.menuContainer.setMaximumSize(QSize(350, 16777215))
         self.menuContainer.setStyleSheet(u"QFrame {\n"
 "	background-color: rgb(45, 45, 45);\n"
 "	border: none;\n"
@@ -210,31 +215,50 @@ class Ui_MainWindow(object):
         self.horizontalLayout_10 = QHBoxLayout(self.connectContainer)
         self.horizontalLayout_10.setObjectName(u"horizontalLayout_10")
         self.horizontalLayout_10.setContentsMargins(0, 0, 0, 0)
+        self.horizontalSpacer_9 = QSpacerItem(40, 20, QSizePolicy.Policy.Expanding, QSizePolicy.Policy.Minimum)
+
+        self.horizontalLayout_10.addItem(self.horizontalSpacer_9)
+
         self.connectPushButton = QPushButton(self.connectContainer)
         self.connectPushButton.setObjectName(u"connectPushButton")
-        sizePolicy = QSizePolicy(QSizePolicy.Policy.Minimum, QSizePolicy.Policy.Fixed)
-        sizePolicy.setHorizontalStretch(0)
-        sizePolicy.setVerticalStretch(0)
-        sizePolicy.setHeightForWidth(self.connectPushButton.sizePolicy().hasHeightForWidth())
-        self.connectPushButton.setSizePolicy(sizePolicy)
-        self.connectPushButton.setMinimumSize(QSize(0, 50))
+        sizePolicy1 = QSizePolicy(QSizePolicy.Policy.Preferred, QSizePolicy.Policy.Fixed)
+        sizePolicy1.setHorizontalStretch(0)
+        sizePolicy1.setVerticalStretch(0)
+        sizePolicy1.setHeightForWidth(self.connectPushButton.sizePolicy().hasHeightForWidth())
+        self.connectPushButton.setSizePolicy(sizePolicy1)
+        self.connectPushButton.setMinimumSize(QSize(150, 50))
         self.connectPushButton.setMaximumSize(QSize(140, 16777215))
         self.connectPushButton.setFont(font1)
         self.connectPushButton.setCursor(QCursor(Qt.CursorShape.PointingHandCursor))
 
         self.horizontalLayout_10.addWidget(self.connectPushButton)
 
-        self.connectionStatusContainer = QWidget(self.connectContainer)
+        self.senderStatusContainer = QFrame(self.connectContainer)
+        self.senderStatusContainer.setObjectName(u"senderStatusContainer")
+        self.senderStatusContainer.setLayoutDirection(Qt.LayoutDirection.LeftToRight)
+        self.senderStatusContainer.setFrameShape(QFrame.Shape.StyledPanel)
+        self.senderStatusContainer.setFrameShadow(QFrame.Shadow.Raised)
+        self.horizontalLayout_6 = QHBoxLayout(self.senderStatusContainer)
+        self.horizontalLayout_6.setObjectName(u"horizontalLayout_6")
+        self.horizontalLayout_6.setContentsMargins(0, -1, -1, -1)
+        self.connectionStatusContainer = QWidget(self.senderStatusContainer)
         self.connectionStatusContainer.setObjectName(u"connectionStatusContainer")
         self.connectionStatusContainer.setMaximumSize(QSize(15, 15))
+        self.connectionStatusContainer.setLayoutDirection(Qt.LayoutDirection.LeftToRight)
         self.connectionStatusContainer.setAutoFillBackground(False)
         self.connectionStatusContainer.setStyleSheet(u"QWidget {\n"
 "	background-color: rgb(255, 0, 0);\n"
 "	border-radius: 7px\n"
 "}")
 
-        self.horizontalLayout_10.addWidget(self.connectionStatusContainer)
+        self.horizontalLayout_6.addWidget(self.connectionStatusContainer)
 
+
+        self.horizontalLayout_10.addWidget(self.senderStatusContainer)
+
+        self.horizontalLayout_10.setStretch(0, 1)
+        self.horizontalLayout_10.setStretch(1, 3)
+        self.horizontalLayout_10.setStretch(2, 1)
 
         self.verticalLayout_12.addWidget(self.connectContainer)
 
@@ -255,11 +279,11 @@ class Ui_MainWindow(object):
         self.verticalLayout_11.setContentsMargins(0, 0, 0, 0)
         self.errorPlainTextEdit = QPlainTextEdit(self.senderMainContainer)
         self.errorPlainTextEdit.setObjectName(u"errorPlainTextEdit")
-        sizePolicy1 = QSizePolicy(QSizePolicy.Policy.Expanding, QSizePolicy.Policy.Expanding)
-        sizePolicy1.setHorizontalStretch(0)
-        sizePolicy1.setVerticalStretch(0)
-        sizePolicy1.setHeightForWidth(self.errorPlainTextEdit.sizePolicy().hasHeightForWidth())
-        self.errorPlainTextEdit.setSizePolicy(sizePolicy1)
+        sizePolicy2 = QSizePolicy(QSizePolicy.Policy.Expanding, QSizePolicy.Policy.Expanding)
+        sizePolicy2.setHorizontalStretch(0)
+        sizePolicy2.setVerticalStretch(0)
+        sizePolicy2.setHeightForWidth(self.errorPlainTextEdit.sizePolicy().hasHeightForWidth())
+        self.errorPlainTextEdit.setSizePolicy(sizePolicy2)
         self.errorPlainTextEdit.setMinimumSize(QSize(0, 100))
         font3 = QFont()
         font3.setPointSize(14)
@@ -295,9 +319,68 @@ class Ui_MainWindow(object):
 "}")
         self.dropFileContainer.setFrameShape(QFrame.Shape.StyledPanel)
         self.dropFileContainer.setFrameShadow(QFrame.Shadow.Raised)
+        self.verticalLayout_3 = QVBoxLayout(self.dropFileContainer)
+        self.verticalLayout_3.setObjectName(u"verticalLayout_3")
+        self.verticalLayout_3.setContentsMargins(20, 20, 0, 30)
+        self.dropOptionContainer = QFrame(self.dropFileContainer)
+        self.dropOptionContainer.setObjectName(u"dropOptionContainer")
+        self.dropOptionContainer.setMinimumSize(QSize(0, 50))
+        self.dropOptionContainer.setFrameShape(QFrame.Shape.StyledPanel)
+        self.dropOptionContainer.setFrameShadow(QFrame.Shadow.Raised)
+        self.horizontalLayout_2 = QHBoxLayout(self.dropOptionContainer)
+        self.horizontalLayout_2.setObjectName(u"horizontalLayout_2")
+        self.horizontalLayout_2.setContentsMargins(0, 0, 0, 0)
+        self.horizontalSpacer_3 = QSpacerItem(40, 20, QSizePolicy.Policy.Expanding, QSizePolicy.Policy.Minimum)
+
+        self.horizontalLayout_2.addItem(self.horizontalSpacer_3)
+
+        self.browsePushButton = QPushButton(self.dropOptionContainer)
+        self.browsePushButton.setObjectName(u"browsePushButton")
+        self.browsePushButton.setMinimumSize(QSize(0, 45))
+        self.browsePushButton.setFont(font1)
+        self.browsePushButton.setCursor(QCursor(Qt.CursorShape.PointingHandCursor))
+
+        self.horizontalLayout_2.addWidget(self.browsePushButton)
+
+        self.horizontalSpacer_2 = QSpacerItem(40, 20, QSizePolicy.Policy.Expanding, QSizePolicy.Policy.Minimum)
+
+        self.horizontalLayout_2.addItem(self.horizontalSpacer_2)
+
+        self.removePushButton = QPushButton(self.dropOptionContainer)
+        self.removePushButton.setObjectName(u"removePushButton")
+        self.removePushButton.setMinimumSize(QSize(0, 45))
+        self.removePushButton.setFont(font1)
+        self.removePushButton.setCursor(QCursor(Qt.CursorShape.PointingHandCursor))
+
+        self.horizontalLayout_2.addWidget(self.removePushButton)
+
+        self.removeComboBox = QComboBox(self.dropOptionContainer)
+        self.removeComboBox.setObjectName(u"removeComboBox")
+        self.removeComboBox.setMinimumSize(QSize(0, 45))
+        self.removeComboBox.setMaximumSize(QSize(16777213, 16777215))
+        self.removeComboBox.setFont(font1)
+        self.removeComboBox.setCursor(QCursor(Qt.CursorShape.PointingHandCursor))
+        self.removeComboBox.setStyleSheet(u"QComboBox QAbstractItemView {\n"
+"    background-color: rgb(45, 45, 45);\n"
+"}")
+
+        self.horizontalLayout_2.addWidget(self.removeComboBox)
+
+        self.horizontalSpacer_4 = QSpacerItem(40, 20, QSizePolicy.Policy.Expanding, QSizePolicy.Policy.Minimum)
+
+        self.horizontalLayout_2.addItem(self.horizontalSpacer_4)
+
+        self.horizontalLayout_2.setStretch(0, 1)
+        self.horizontalLayout_2.setStretch(1, 10)
+        self.horizontalLayout_2.setStretch(2, 3)
+        self.horizontalLayout_2.setStretch(3, 6)
+        self.horizontalLayout_2.setStretch(4, 10)
+        self.horizontalLayout_2.setStretch(5, 1)
+
+        self.verticalLayout_3.addWidget(self.dropOptionContainer)
+
         self.dropFileLabel = DropFileLabel(self.dropFileContainer)
         self.dropFileLabel.setObjectName(u"dropFileLabel")
-        self.dropFileLabel.setGeometry(QRect(20, 90, 561, 241))
         font4 = QFont()
         font4.setPointSize(16)
         self.dropFileLabel.setFont(font4)
@@ -307,25 +390,10 @@ class Ui_MainWindow(object):
 "	border: 1px solid rgb(255, 255, 255);\n"
 "}")
         self.dropFileLabel.setAlignment(Qt.AlignmentFlag.AlignCenter)
-        self.browsePushButton = QPushButton(self.dropFileContainer)
-        self.browsePushButton.setObjectName(u"browsePushButton")
-        self.browsePushButton.setGeometry(QRect(40, 30, 181, 41))
-        self.browsePushButton.setFont(font1)
-        self.browsePushButton.setCursor(QCursor(Qt.CursorShape.PointingHandCursor))
-        self.removeComboBox = QComboBox(self.dropFileContainer)
-        self.removeComboBox.setObjectName(u"removeComboBox")
-        self.removeComboBox.setGeometry(QRect(350, 30, 211, 41))
-        self.removeComboBox.setMaximumSize(QSize(16777213, 16777215))
-        self.removeComboBox.setFont(font1)
-        self.removeComboBox.setCursor(QCursor(Qt.CursorShape.PointingHandCursor))
-        self.removeComboBox.setStyleSheet(u"QComboBox QAbstractItemView {\n"
-"    background-color: rgb(45, 45, 45);\n"
-"}")
-        self.removePushButton = QPushButton(self.dropFileContainer)
-        self.removePushButton.setObjectName(u"removePushButton")
-        self.removePushButton.setGeometry(QRect(250, 30, 91, 41))
-        self.removePushButton.setFont(font1)
-        self.removePushButton.setCursor(QCursor(Qt.CursorShape.PointingHandCursor))
+
+        self.verticalLayout_3.addWidget(self.dropFileLabel)
+
+        self.verticalLayout_3.setStretch(1, 4)
 
         self.horizontalLayout_9.addWidget(self.dropFileContainer)
 
@@ -337,34 +405,76 @@ class Ui_MainWindow(object):
 "}")
         self.addedFilesContainer.setFrameShape(QFrame.Shape.StyledPanel)
         self.addedFilesContainer.setFrameShadow(QFrame.Shadow.Raised)
-        self.sendPushButton = QPushButton(self.addedFilesContainer)
-        self.sendPushButton.setObjectName(u"sendPushButton")
-        self.sendPushButton.setGeometry(QRect(100, 270, 151, 51))
-        self.sendPushButton.setFont(font1)
-        self.sendPushButton.setCursor(QCursor(Qt.CursorShape.PointingHandCursor))
-        self.sendPushButton.setStyleSheet(u"")
-        self.percentCompletedLabel = QLabel(self.addedFilesContainer)
-        self.percentCompletedLabel.setObjectName(u"percentCompletedLabel")
-        self.percentCompletedLabel.setGeometry(QRect(260, 280, 41, 31))
-        self.percentCompletedLabel.setFont(font1)
-        self.percentCompletedLabel.setAlignment(Qt.AlignmentFlag.AlignCenter)
+        self.verticalLayout_4 = QVBoxLayout(self.addedFilesContainer)
+        self.verticalLayout_4.setObjectName(u"verticalLayout_4")
+        self.verticalLayout_4.setContentsMargins(30, 30, 30, 20)
         self.addedFilesPlainTextEdit = QPlainTextEdit(self.addedFilesContainer)
         self.addedFilesPlainTextEdit.setObjectName(u"addedFilesPlainTextEdit")
-        self.addedFilesPlainTextEdit.setGeometry(QRect(30, 40, 281, 221))
         self.addedFilesPlainTextEdit.setStyleSheet(u"QPlainTextEdit {\n"
 "	background-color: rgb(45, 45, 45);\n"
 "	border: 1px solid rgb(45, 45, 45);\n"
 "}")
         self.addedFilesPlainTextEdit.setReadOnly(True)
 
+        self.verticalLayout_4.addWidget(self.addedFilesPlainTextEdit)
+
+        self.sendContainer = QFrame(self.addedFilesContainer)
+        self.sendContainer.setObjectName(u"sendContainer")
+        self.sendContainer.setFrameShape(QFrame.Shape.StyledPanel)
+        self.sendContainer.setFrameShadow(QFrame.Shadow.Raised)
+        self.horizontalLayout_4 = QHBoxLayout(self.sendContainer)
+        self.horizontalLayout_4.setObjectName(u"horizontalLayout_4")
+        self.horizontalLayout_4.setContentsMargins(0, 0, 0, 0)
+        self.horizontalSpacer_7 = QSpacerItem(40, 20, QSizePolicy.Policy.Expanding, QSizePolicy.Policy.Minimum)
+
+        self.horizontalLayout_4.addItem(self.horizontalSpacer_7)
+
+        self.horizontalSpacer_5 = QSpacerItem(40, 20, QSizePolicy.Policy.Expanding, QSizePolicy.Policy.Minimum)
+
+        self.horizontalLayout_4.addItem(self.horizontalSpacer_5)
+
+        self.sendPushButton = QPushButton(self.sendContainer)
+        self.sendPushButton.setObjectName(u"sendPushButton")
+        self.sendPushButton.setMinimumSize(QSize(0, 50))
+        self.sendPushButton.setFont(font1)
+        self.sendPushButton.setCursor(QCursor(Qt.CursorShape.PointingHandCursor))
+        self.sendPushButton.setStyleSheet(u"")
+
+        self.horizontalLayout_4.addWidget(self.sendPushButton)
+
+        self.percentCompletedLabel = QLabel(self.sendContainer)
+        self.percentCompletedLabel.setObjectName(u"percentCompletedLabel")
+        self.percentCompletedLabel.setFont(font1)
+        self.percentCompletedLabel.setAlignment(Qt.AlignmentFlag.AlignCenter)
+
+        self.horizontalLayout_4.addWidget(self.percentCompletedLabel)
+
+        self.horizontalSpacer_6 = QSpacerItem(40, 20, QSizePolicy.Policy.Expanding, QSizePolicy.Policy.Minimum)
+
+        self.horizontalLayout_4.addItem(self.horizontalSpacer_6)
+
+        self.horizontalLayout_4.setStretch(1, 1)
+        self.horizontalLayout_4.setStretch(2, 3)
+        self.horizontalLayout_4.setStretch(3, 1)
+
+        self.verticalLayout_4.addWidget(self.sendContainer)
+
+
         self.horizontalLayout_9.addWidget(self.addedFilesContainer)
 
+        self.horizontalLayout_9.setStretch(0, 3)
+        self.horizontalLayout_9.setStretch(1, 1)
 
         self.verticalLayout_11.addWidget(self.lowerMainContainer)
 
+        self.verticalLayout_11.setStretch(0, 2)
+        self.verticalLayout_11.setStretch(1, 2)
+        self.verticalLayout_11.setStretch(2, 4)
 
         self.horizontalLayout_11.addWidget(self.senderMainContainer)
 
+        self.horizontalLayout_11.setStretch(0, 1)
+        self.horizontalLayout_11.setStretch(1, 5)
         self.stackedWidget.addWidget(self.senderPage)
         self.recieverPage = QWidget()
         self.recieverPage.setObjectName(u"recieverPage")
@@ -374,8 +484,10 @@ class Ui_MainWindow(object):
         self.horizontalLayout.setContentsMargins(0, 0, 0, 0)
         self.recieverMenuContainer = QFrame(self.recieverPage)
         self.recieverMenuContainer.setObjectName(u"recieverMenuContainer")
+        sizePolicy.setHeightForWidth(self.recieverMenuContainer.sizePolicy().hasHeightForWidth())
+        self.recieverMenuContainer.setSizePolicy(sizePolicy)
         self.recieverMenuContainer.setMinimumSize(QSize(250, 0))
-        self.recieverMenuContainer.setMaximumSize(QSize(250, 16777215))
+        self.recieverMenuContainer.setMaximumSize(QSize(350, 16777215))
         self.recieverMenuContainer.setStyleSheet(u"QFrame {\n"
 "	background-color: rgb(45, 45, 45);\n"
 "	border: none;\n"
@@ -474,18 +586,40 @@ class Ui_MainWindow(object):
         self.horizontalLayout_12 = QHBoxLayout(self.StartContainer)
         self.horizontalLayout_12.setObjectName(u"horizontalLayout_12")
         self.horizontalLayout_12.setContentsMargins(0, 0, 0, 0)
+        self.horizontalSpacer_8 = QSpacerItem(40, 20, QSizePolicy.Policy.Expanding, QSizePolicy.Policy.Minimum)
+
+        self.horizontalLayout_12.addItem(self.horizontalSpacer_8)
+
         self.startPushButton = QPushButton(self.StartContainer)
         self.startPushButton.setObjectName(u"startPushButton")
-        self.startPushButton.setMinimumSize(QSize(0, 50))
-        self.startPushButton.setMaximumSize(QSize(160, 16777215))
+        sizePolicy3 = QSizePolicy(QSizePolicy.Policy.Fixed, QSizePolicy.Policy.Fixed)
+        sizePolicy3.setHorizontalStretch(0)
+        sizePolicy3.setVerticalStretch(0)
+        sizePolicy3.setHeightForWidth(self.startPushButton.sizePolicy().hasHeightForWidth())
+        self.startPushButton.setSizePolicy(sizePolicy3)
+        self.startPushButton.setMinimumSize(QSize(150, 50))
+        self.startPushButton.setMaximumSize(QSize(150, 16777215))
         self.startPushButton.setFont(font1)
         self.startPushButton.setCursor(QCursor(Qt.CursorShape.PointingHandCursor))
         self.startPushButton.setStyleSheet(u"")
 
         self.horizontalLayout_12.addWidget(self.startPushButton)
 
-        self.StartStatusContainer = QWidget(self.StartContainer)
+        self.recieverStatusContainer = QFrame(self.StartContainer)
+        self.recieverStatusContainer.setObjectName(u"recieverStatusContainer")
+        self.recieverStatusContainer.setLayoutDirection(Qt.LayoutDirection.LeftToRight)
+        self.recieverStatusContainer.setFrameShape(QFrame.Shape.StyledPanel)
+        self.recieverStatusContainer.setFrameShadow(QFrame.Shadow.Raised)
+        self.horizontalLayout_7 = QHBoxLayout(self.recieverStatusContainer)
+        self.horizontalLayout_7.setObjectName(u"horizontalLayout_7")
+        self.horizontalLayout_7.setContentsMargins(0, 9, 9, 9)
+        self.StartStatusContainer = QWidget(self.recieverStatusContainer)
         self.StartStatusContainer.setObjectName(u"StartStatusContainer")
+        sizePolicy4 = QSizePolicy(QSizePolicy.Policy.Fixed, QSizePolicy.Policy.Preferred)
+        sizePolicy4.setHorizontalStretch(0)
+        sizePolicy4.setVerticalStretch(0)
+        sizePolicy4.setHeightForWidth(self.StartStatusContainer.sizePolicy().hasHeightForWidth())
+        self.StartStatusContainer.setSizePolicy(sizePolicy4)
         self.StartStatusContainer.setMaximumSize(QSize(15, 15))
         self.StartStatusContainer.setAutoFillBackground(False)
         self.StartStatusContainer.setStyleSheet(u"QWidget {\n"
@@ -493,8 +627,14 @@ class Ui_MainWindow(object):
 "	border-radius: 7px\n"
 "}")
 
-        self.horizontalLayout_12.addWidget(self.StartStatusContainer)
+        self.horizontalLayout_7.addWidget(self.StartStatusContainer)
 
+
+        self.horizontalLayout_12.addWidget(self.recieverStatusContainer)
+
+        self.horizontalLayout_12.setStretch(0, 1)
+        self.horizontalLayout_12.setStretch(1, 3)
+        self.horizontalLayout_12.setStretch(2, 1)
 
         self.verticalLayout_15.addWidget(self.StartContainer)
 
@@ -503,6 +643,8 @@ class Ui_MainWindow(object):
 
         self.mainDownloadedContainer = QFrame(self.recieverPage)
         self.mainDownloadedContainer.setObjectName(u"mainDownloadedContainer")
+        sizePolicy.setHeightForWidth(self.mainDownloadedContainer.sizePolicy().hasHeightForWidth())
+        self.mainDownloadedContainer.setSizePolicy(sizePolicy)
         self.mainDownloadedContainer.setStyleSheet(u"QFrame {\n"
 "	background-color: transparent;\n"
 "	border: none;\n"
@@ -524,6 +666,8 @@ class Ui_MainWindow(object):
 
         self.horizontalLayout.addWidget(self.mainDownloadedContainer)
 
+        self.horizontalLayout.setStretch(0, 1)
+        self.horizontalLayout.setStretch(1, 5)
         self.stackedWidget.addWidget(self.recieverPage)
 
         self.verticalLayout.addWidget(self.stackedWidget)
@@ -532,7 +676,7 @@ class Ui_MainWindow(object):
 
         self.retranslateUi(MainWindow)
 
-        self.stackedWidget.setCurrentIndex(1)
+        self.stackedWidget.setCurrentIndex(0)
 
 
         QMetaObject.connectSlotsByName(MainWindow)
@@ -551,12 +695,12 @@ class Ui_MainWindow(object):
         self.portLineEdit.setPlaceholderText(QCoreApplication.translate("MainWindow", u"Recieving port", None))
         self.connectPushButton.setText(QCoreApplication.translate("MainWindow", u"Connect", None))
         self.errorPlainTextEdit.setPlainText("")
-        self.dropFileLabel.setText(QCoreApplication.translate("MainWindow", u"Drop Files Here", None))
         self.browsePushButton.setText(QCoreApplication.translate("MainWindow", u"Browse Files", None))
         self.removePushButton.setText(QCoreApplication.translate("MainWindow", u"Remove", None))
+        self.dropFileLabel.setText(QCoreApplication.translate("MainWindow", u"Drop Files Here", None))
+        self.addedFilesPlainTextEdit.setPlainText("")
         self.sendPushButton.setText(QCoreApplication.translate("MainWindow", u"Send", None))
         self.percentCompletedLabel.setText(QCoreApplication.translate("MainWindow", u"0/0", None))
-        self.addedFilesPlainTextEdit.setPlainText("")
         self.recieverDestinationLabel.setText(QCoreApplication.translate("MainWindow", u"Destination", None))
         self.usingIPLabel.setText(QCoreApplication.translate("MainWindow", u"IP: 192.168.x.x", None))
         self.recieverPortLabel.setText(QCoreApplication.translate("MainWindow", u"Port", None))
