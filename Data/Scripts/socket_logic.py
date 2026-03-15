@@ -11,7 +11,6 @@ from PySide6.QtCore import QThread, Signal
 
 KEY = b"VeloDataTestKey1"
 NOISE = b"ThisIsSomeTstSlt"
-CIPHER = AES.new(KEY, AES.MODE_EAX, NOISE)
 
 def setUpReciever() -> tuple[socket, int]:
     serverSocket = socket(AF_INET, SOCK_STREAM)
@@ -20,6 +19,16 @@ def setUpReciever() -> tuple[socket, int]:
     serverSocket.listen()
 
     return (serverSocket, port)
+
+def encrypt(data):
+    cypher = AES.new(KEY, AES.MODE_EAX, NOISE)
+    data = cypher.encrypt(data)
+    return data
+
+def decrypt(data):
+    cypher = AES.new(KEY, AES.MODE_EAX, NOISE)
+    data = cypher.decrypt(data)
+    return data
 
 def getUserIp() -> str:
     return gethostbyname(gethostname())
@@ -40,7 +49,7 @@ def sendFiles(client: socket, removeFile: callable, sentProgress: callable):
         with open(f"Sending_files/{fileName}", "rb") as fh:
             data = fh.read()
 
-        data = CIPHER.encrypt(data)
+        data = encrypt(data)
         fileNameEncoded = fileName.encode()
 
         client.send(len(fileNameEncoded).to_bytes(4, "big"))
@@ -69,7 +78,7 @@ class RecieverThread(QThread):
                     self.client, addr = self.serverSocket.accept()
                     self.connected = True
                     self.statusFunc.emit("green")
-                except TimeoutError:
+                except (TimeoutError, OSError) as e:
                     continue
             else:
                 try:
@@ -86,7 +95,7 @@ class RecieverThread(QThread):
                         data = self.recvAll(self.client, dataSize)
 
                         # Decrypt and save
-                        data = CIPHER.decrypt(data)
+                        data = decrypt(data)
                         with open(f"Recieved_files/{fileName}", "wb") as fh:
                             fh.write(data)
                         self.downloadFunc.emit(int(len(data)/1000))
@@ -117,7 +126,4 @@ class SenderThread(QThread):
         self.client = client
 
     def run(self):
-        try:
-            sendFiles(self.client, self.removeFile, self.sentProgress)
-        except:
-            self.sentStatus.emit("orange")
+        sendFiles(self.client, self.removeFile, self.sentProgress)

@@ -18,12 +18,10 @@ class MainWindow(QMainWindow):
         # Reciever
         self.recieverSocket = None
         self.recieverThread = None
-        self.recieving = False
 
         # Sender
         self.senderSocket = None
         self.senderThread = None
-        self.sending = False
 
         # Other attributes
         self.downloaded = 0
@@ -62,11 +60,10 @@ class MainWindow(QMainWindow):
             self.ui.addedFilesPlainTextEdit.insertPlainText(fileName + "\n")
 
     def connectPushButton_callback(self):
-        if self.sending:
+        if self.senderSocket:
             # Reset
             self.senderSocket.close()
             self.senderSocket = None
-            self.sending = False
 
             # UI reset
             self.set_sender_status("red")
@@ -92,8 +89,6 @@ class MainWindow(QMainWindow):
         self.senderSocket = sk.senderConnect(hostname, int(port))
 
         if self.senderSocket:
-            self.sending = True
-
             # UI changes
             self.ui.senderInfoPlainTextEdit.setPlainText("")
             self.ui.connectPushButton.setText("Disconnect")
@@ -108,7 +103,7 @@ class MainWindow(QMainWindow):
             self.ui.recieverDestinationContainer.setEnabled(True)
 
     def sendPushButton_callback(self):
-        if not self.sending:
+        if not self.senderSocket:
             return
         self.ui.sendPushButton.setEnabled(False)
         self.senderThread = sk.SenderThread(self.senderSocket)
@@ -119,7 +114,7 @@ class MainWindow(QMainWindow):
         self.senderThread.start()
 
     def startPushButton_callback(self):
-        if self.recieving:
+        if self.recieverSocket:
             self.recieverThread.stop()
             self.recieverThread.wait()
             self.recieverThread = None
@@ -131,8 +126,6 @@ class MainWindow(QMainWindow):
             self.ui.usingPortLabel.setText(f"Using Port: -")
             self.ui.startPushButton.setText("Start reciever")
 
-            self.recieving = False
-
             self.ui.senderPushButton.setEnabled(True)
             return
         
@@ -140,7 +133,6 @@ class MainWindow(QMainWindow):
         self.ui.senderPushButton.setEnabled(False)
 
         # Setup
-        self.recieving = True
         self.recieverSocket, recieverPort = sk.setUpReciever()
 
         # Update UI
