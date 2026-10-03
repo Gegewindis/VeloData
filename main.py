@@ -1,7 +1,6 @@
 import Data.Scripts.socket_logic as SL
 import os
 import shutil
-
 from PySide6.QtWidgets import QApplication, QMainWindow, QFileDialog
 from PySide6.QtGui import QIcon
 from Data.Design.ui import Ui_MainWindow

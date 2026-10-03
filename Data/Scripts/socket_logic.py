@@ -20,12 +20,12 @@ def setUpReciever() -> tuple[socket, int]:
 
     return (serverSocket, port)
 
-def encrypt(data):
+def encrypt(data: bytes) -> bytes:
     cypher = AES.new(KEY, AES.MODE_EAX, NOISE)
     data = cypher.encrypt(data)
     return data
 
-def decrypt(data):
+def decrypt(data: bytes) -> bytes:
     cypher = AES.new(KEY, AES.MODE_EAX, NOISE)
     data = cypher.decrypt(data)
     return data
@@ -41,12 +41,12 @@ def senderConnect(hostName : str | int, port: int) -> socket:
     except:
         return None
     
-def sendFiles(client: socket, removeFile: callable, sentProgress: callable):
+def sendFiles(client: socket, removeFile: callable, sentProgress: callable) -> None:
     fileNames = os.listdir("Sending_files/")
     fileNames.remove(".gitkeep")
     sentProgress.emit(f"0/{len(fileNames)}")
     for i, fileName in enumerate(fileNames):
-        with open(f"Sending_files/{fileName}", "rb") as fh:
+        with open(f"Sending_files/{fileName}", "rb") as fh: ## NEEDS TO BE SPLIT UP INTO CHUNKS
             data = fh.read()
 
         data = encrypt(data)
@@ -102,7 +102,7 @@ class RecieverThread(QThread):
                 except (ConnectionAbortedError, ConnectionResetError) as e:
                     pass
 
-    def recvAll(self, sock: socket, size: int):
+    def recvAll(self, sock: socket, size: int) -> bytes:
         data = b""
         while len(data) < size:
             chunk = sock.recv(size - len(data))
@@ -111,7 +111,7 @@ class RecieverThread(QThread):
             data += chunk
         return data
 
-    def stop(self):
+    def stop(self) -> None:
         self.running = False
         if self.client:
             self.client.close()
