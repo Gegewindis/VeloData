@@ -63,32 +63,7 @@ def senderConnect(hostName : str | int, port: int) -> socket:
     except:
         return None
     
-def sendFiles(client: socket, removeFile: callable, sentProgress: callable) -> None:
-    fileNames = os.listdir("Sending_files/")
-    fileNames.remove(".gitkeep")
-    sentProgress.emit(f"0/{len(fileNames)}")
-    for i, fileName in enumerate(fileNames):
-        fileSize = os.path.getsize(f"Sending_files/{fileName}")
-        fileNameEncoded = fileName.encode()
-        client.send(len(fileNameEncoded).to_bytes(1, "big"))
-        client.send(fileNameEncoded)
-        client.send(fileSize.to_bytes(6, "big"))
 
-        #cypher = AES.new(KEY, AES.MODE_EAX, NOISE)
-
-        with open(f"Sending_files/{fileName}", "rb") as fh: ## NEEDS TO BE SPLIT UP INTO CHUNKS
-            while True:
-                data = fh.read(CHUNK_SIZE)
-                if not data:
-                    break
-                # data = cypher.encrypt(data)
-                client.send(data)
-
-        # tag = cypher.digest() TAG TO VERIFY INTEGRITY
-        # client.send(tag)
-
-        removeFile.emit(fileName)
-        sentProgress.emit(f"{str(i + 1)}/{str(len(fileNames))}")
 
 class RecieverThread(QThread):
     statusFunc = Signal(str)
@@ -197,4 +172,35 @@ class SenderThread(QThread):
         self.client = client
 
     def run(self):
-        sendFiles(self.client, self.removeFile, self.sentProgress)
+        self.sendFiles(self.client, self.removeFile, self.sentProgress)
+
+    def sendFiles(self, client: socket, removeFile: callable, sentProgress: callable) -> None:
+        fileNames = os.listdir("Sending_files/")
+        fileNames.remove(".gitkeep")
+        sentProgress.emit(f"0/{len(fileNames)}")
+        for i, fileName in enumerate(fileNames):
+            fileSize = os.path.getsize(f"Sending_files/{fileName}")
+            fileNameEncoded = fileName.encode()
+            client.send(len(fileNameEncoded).to_bytes(1, "big"))
+            client.send(fileNameEncoded)
+            client.send(fileSize.to_bytes(6, "big"))
+
+            #cypher = AES.new(KEY, AES.MODE_EAX, NOISE)
+
+            with open(f"Sending_files/{fileName}", "rb") as fh:
+                while True:
+                    data = fh.read(CHUNK_SIZE)
+                    if not data:
+                        break
+                    # data = cypher.encrypt(data)
+
+                    try:
+                        client.send(data)
+                    except ConnectionError:
+                        self.sentStatus.emit("orange")
+
+            # tag = cypher.digest() TAG TO VERIFY INTEGRITY
+            # client.send(tag)
+
+            removeFile.emit(fileName)
+            sentProgress.emit(f"{str(i + 1)}/{str(len(fileNames))}")

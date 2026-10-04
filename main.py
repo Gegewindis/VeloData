@@ -5,6 +5,9 @@ from PySide6.QtWidgets import QApplication, QMainWindow, QFileDialog
 from PySide6.QtGui import QIcon
 from Data.Design.ui import Ui_MainWindow
 
+# BUGS
+# Encryption is not implemented
+
 class MainWindow(QMainWindow):
     def __init__(self):
         super().__init__()
@@ -167,14 +170,16 @@ class MainWindow(QMainWindow):
         self.ui.percentCompletedLabel.setText(progress)
 
     def set_downloaded(self, amount: int):
-        self.downloaded += amount
+        self.downloaded += amount          # total in bytes
+        self.ui.downloadedLabel.setText(f"Received: {self.formatSize(self.downloaded)}")
 
-        if self.downloaded < 1000:
-            self.ui.downloadedLabel.setText(f"KB Recieved: {self.downloaded}")
-        elif self.downloaded < 1000000:
-            self.ui.downloadedLabel.setText(f"MB Recieved: {self.downloaded/1000:.2f}")
-        else:
-            self.ui.downloadedLabel.setText(f"GB Recieved: {self.downloaded/1000000:.2f}")
+    @staticmethod
+    def formatSize(n: float) -> str:
+        for unit in ("B", "KB", "MB", "GB"):
+            if n < 1000:
+                return f"{n:.0f} {unit}" if unit == "B" else f"{n:.2f} {unit}"
+            n /= 1000
+        return f"{n:.2f} TB"
 
     def remove_file(self, fileName: str) -> None:
         # Removes it from the folder
