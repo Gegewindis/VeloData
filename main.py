@@ -185,7 +185,7 @@ class MainWindow(QMainWindow):
     def remove_file(self, fileName: str) -> None:
         """Removes a specific file from sending folder"""
         # Removes it from the folder
-        filePath = os.join(SL.SEND_DIR, fileName)
+        filePath = os.path.join(SL.SEND_DIR, fileName)
         os.remove(filePath)
 
         # Removes the selected comboBox alternative
@@ -206,7 +206,7 @@ class MainWindow(QMainWindow):
     # Cleanup method
     def closeEvent(self, event):
         """Method for cleanup before exiting"""
-        for fileName in os.listdir("Sending_files/"):
+        for fileName in os.listdir(SL.SEND_DIR):
             if fileName != ".gitkeep":
                 os.remove(f"Sending_files/{fileName}")
 
