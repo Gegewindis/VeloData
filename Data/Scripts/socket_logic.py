@@ -70,7 +70,7 @@ def sendFiles(client: socket, removeFile: callable, sentProgress: callable) -> N
     for i, fileName in enumerate(fileNames):
         fileSize = os.path.getsize(f"Sending_files/{fileName}")
         fileNameEncoded = fileName.encode()
-        client.send(len(fileNameEncoded).to_bytes(4, "big"))
+        client.send(len(fileNameEncoded).to_bytes(1, "big"))
         client.send(fileNameEncoded)
         client.send(fileSize.to_bytes(6, "big"))
 
@@ -123,7 +123,8 @@ class RecieverThread(QThread):
                     except OSError:
                         break
                     except Exception as e:
-                        # self.errorOccurred.emit(str(e))   # later
+                        #self.errorOccurred.emit(str(e))   # later
+                        print(str(e))
                         self.statusFunc.emit("orange")
                         self.connected = False
                         self.client.close()
@@ -134,7 +135,7 @@ class RecieverThread(QThread):
                 self.client.close()
                 self.client = None
 
-    def recieve(self, sock: socket.socket, size: int) -> bytes:
+    def recieve(self, sock: socket, size: int) -> bytes:
         data = bytearray()
         while len(data) < size:
             if not self.running:
