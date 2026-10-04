@@ -120,8 +120,6 @@ class RecieverThread(QThread):
                         self.downloadFunc.emit(size)
                     except InterruptedError:                 # stop() was called
                         break
-                    except OSError:
-                        break
                     except Exception as e:
                         #self.errorOccurred.emit(str(e))   # later
                         print(str(e))
@@ -142,7 +140,7 @@ class RecieverThread(QThread):
                 raise InterruptedError
             try:
                 chunk = sock.recv(min(size - len(data), CHUNK_SIZE))
-            except socket.timeout:
+            except TimeoutError:
                 continue
 
             if not chunk:
