@@ -158,15 +158,19 @@ class MainWindow(QMainWindow):
 
     # UI update methods
     def set_reciever_status(self, color: str) -> None:
+        """Changes the reciever signal color"""
         self.ui.StartStatusContainer.setStyleSheet("QWidget {\nbackground-color: " + color + ";\nborder-radius: 7px\n}")
 
     def set_sender_status(self, color: str) -> None:
+        """Changes the sender signal color"""
         self.ui.connectionStatusContainer.setStyleSheet("QWidget {\nbackground-color:" + color + ";\nborder-radius: 7px\n}")
     
     def set_sent_progress(self, progress: str) -> None:
+        """Sets the sender progress text"""
         self.ui.percentCompletedLabel.setText(progress)
 
     def set_downloaded(self, amount: int):
+        """Sets the downloaded amount text"""
         self.downloaded += amount          # total in bytes
         self.ui.downloadedLabel.setText(f"Received: {self.formatSize(self.downloaded)}")
 
@@ -179,8 +183,10 @@ class MainWindow(QMainWindow):
         return f"{n:.2f} TB"
 
     def remove_file(self, fileName: str) -> None:
+        """Removes a specific file from sending folder"""
         # Removes it from the folder
-        os.remove(f"Sending_files/{fileName}")
+        filePath = os.join(SL.SEND_DIR, fileName)
+        os.remove(filePath)
 
         # Removes the selected comboBox alternative
         self.ui.removeComboBox.removeItem(self.ui.removeComboBox.findText(fileName))
@@ -193,11 +199,13 @@ class MainWindow(QMainWindow):
         self.ui.addedFilesPlainTextEdit.setPlainText(plainText)
 
     def on_dropped_file(self, fileName: str) -> None:
+        """Adds a file to the ui"""
         self.ui.removeComboBox.addItem(fileName)
         self.ui.addedFilesPlainTextEdit.insertPlainText(fileName + "\n")
 
     # Cleanup method
     def closeEvent(self, event):
+        """Method for cleanup before exiting"""
         for fileName in os.listdir("Sending_files/"):
             if fileName != ".gitkeep":
                 os.remove(f"Sending_files/{fileName}")

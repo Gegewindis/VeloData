@@ -10,14 +10,14 @@ import os
 from PySide6.QtCore import QThread, Signal
 import shutil
 import re
+from pathlib import Path
 
 KEY = b"VeloDataTestKey1"
-NOISE = b"ThisIsSomeTstSlt" ### NEEDS TO BE RANDOM FOR IT TO BE SECURE
 CHUNK_SIZE = 65536 # 4kb
 
-RECIEVED_DIR = "Recieved_files/"
+# RECIEVED_DIR = "Recieved_files/"
 SEND_DIR = "Sending_files/"
-
+RECIEVED_DIR = str(Path.home() / "Downloads")
 
 _FORBIDDEN = re.compile(r'[<>:"/\\|?*\x00-\x1f]')
 _RESERVED = {"CON", "PRN", "AUX", "NUL",
@@ -41,16 +41,6 @@ def setUpReciever() -> tuple[socket, int]:
     serverSocket.listen()
     return (serverSocket, port)
 
-# def encrypt(data: bytes) -> bytes:
-#     cypher = AES.new(KEY, AES.MODE_EAX, NOISE)
-#     data = cypher.encrypt(data)
-#     return data
-
-# def decrypt(data: bytes) -> bytes:
-#     cypher = AES.new(KEY, AES.MODE_EAX, NOISE)
-#     data = cypher.decrypt(data)
-#     return data
-
 def getUserIp() -> str:
     return gethostbyname(gethostname())
 
@@ -62,8 +52,6 @@ def senderConnect(hostName : str | int, port: int) -> socket:
     except:
         return None
     
-
-
 class RecieverThread(QThread):
     statusFunc = Signal(str)
     downloadFunc = Signal(object)
@@ -146,7 +134,7 @@ class RecieverThread(QThread):
         cypher = AES.new(KEY, AES.MODE_EAX, nonce=nonce)
         cypher.update(header)
 
-        finalPath = RECIEVED_DIR + fileName
+        finalPath = os.path.join(RECIEVED_DIR, fileName)
         tempPath = finalPath + ".part"
 
         try:
@@ -182,12 +170,12 @@ class SenderThread(QThread):
         self.sendFiles(self.client, self.removeFile, self.sentProgress)
 
     def sendFiles(self, client: socket, removeFile: callable, sentProgress: callable) -> None:
-        fileNames = os.listdir("Sending_files/")
+        fileNames = os.listdir(SEND_DIR)
         fileNames.remove(".gitkeep")
         sentProgress.emit(f"0/{len(fileNames)}")
         for i, fileName in enumerate(fileNames):
-            filePath = SEND_DIR + fileName
-            fileSize = os.path.getsize(f"Sending_files/{fileName}")
+            filePath = os.path.join(SEND_DIR, fileName)
+            fileSize = os.path.getsize(filePath)
             nameBytes = fileName.encode()
             header = len(nameBytes).to_bytes(1, "big") + nameBytes + fileSize.to_bytes(6, "big")
 
@@ -197,7 +185,7 @@ class SenderThread(QThread):
             client.sendall(header)
             client.sendall(cypher.nonce)
 
-            with open(f"Sending_files/{fileName}", "rb") as fh:
+            with open(filePath, "rb") as fh:
                 while data := fh.read(CHUNK_SIZE):
                     try:
                         client.sendall(cypher.encrypt(data))
