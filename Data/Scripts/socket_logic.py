@@ -8,9 +8,31 @@ from socket import (
 from Crypto.Cipher import AES
 import os
 from PySide6.QtCore import QThread, Signal
+import shutil
+import re
 
 KEY = b"VeloDataTestKey1"
-NOISE = b"ThisIsSomeTstSlt"
+NOISE = b"ThisIsSomeTstSlt" ### NEEDS TO BE RANDOM FOR IT TO BE SECURE
+CHUNK_SIZE = 65536 # 4kb
+
+RECIEVED_DIR = "Recieved_files/"
+SEND_DIR = "Sending_files/"
+
+
+_FORBIDDEN = re.compile(r'[<>:"/\\|?*\x00-\x1f]')
+_RESERVED = {"CON", "PRN", "AUX", "NUL",
+             *(f"COM{i}" for i in range(1, 10)),
+             *(f"LPT{i}" for i in range(1, 10))}
+
+def _validateName(name: str) -> None:
+    if _FORBIDDEN.search(name):
+        raise ValueError("Forbidden character in file name")
+    if name in (".", ".."):
+        raise ValueError("Bad file name")
+    if name != name.rstrip(" ."):
+        raise ValueError("File name ends with a dot or space")
+    if name.split(".")[0].upper() in _RESERVED:
+        raise ValueError("Reserved file name")
 
 def setUpReciever() -> tuple[socket, int]:
     serverSocket = socket(AF_INET, SOCK_STREAM)
@@ -46,23 +68,31 @@ def sendFiles(client: socket, removeFile: callable, sentProgress: callable) -> N
     fileNames.remove(".gitkeep")
     sentProgress.emit(f"0/{len(fileNames)}")
     for i, fileName in enumerate(fileNames):
-        with open(f"Sending_files/{fileName}", "rb") as fh: ## NEEDS TO BE SPLIT UP INTO CHUNKS
-            data = fh.read()
-
-        data = encrypt(data)
+        fileSize = os.path.getsize(f"Sending_files/{fileName}")
         fileNameEncoded = fileName.encode()
-
         client.send(len(fileNameEncoded).to_bytes(4, "big"))
         client.send(fileNameEncoded)
-        client.send(len(data).to_bytes(6, "big"))
-        client.send(data)
+        client.send(fileSize.to_bytes(6, "big"))
+
+        #cypher = AES.new(KEY, AES.MODE_EAX, NOISE)
+
+        with open(f"Sending_files/{fileName}", "rb") as fh: ## NEEDS TO BE SPLIT UP INTO CHUNKS
+            while True:
+                data = fh.read(CHUNK_SIZE)
+                if not data:
+                    break
+                # data = cypher.encrypt(data)
+                client.send(data)
+
+        # tag = cypher.digest() TAG TO VERIFY INTEGRITY
+        # client.send(tag)
 
         removeFile.emit(fileName)
         sentProgress.emit(f"{str(i + 1)}/{str(len(fileNames))}")
 
 class RecieverThread(QThread):
     statusFunc = Signal(str)
-    downloadFunc = Signal(int)
+    downloadFunc = Signal(object)
     def __init__(self, serverSocket: socket):
         super().__init__()
         self.running = True
@@ -72,51 +102,93 @@ class RecieverThread(QThread):
         self.client = None
 
     def run(self):
-        while self.running:
-            if not self.connected:
-                try: 
-                    self.client, addr = self.serverSocket.accept()
-                    self.connected = True
-                    self.statusFunc.emit("green")
-                except (TimeoutError, OSError) as e:
-                    continue
-            else:
-                try:
-                    # Receive filename
-                    nameSize = int.from_bytes(self.recvAll(self.client, 4), "big")
-                    if not nameSize:
-                        self.connected = False
+        try: 
+            while self.running:
+                if not self.connected:
+                    try: 
+                        self.client, addr = self.serverSocket.accept()
+                        self.client.settimeout(1.0)
+                        self.connected = True
+                        self.statusFunc.emit("green")
+                    except TimeoutError:
+                        continue
+                    except OSError:
+                        break    
+                else:
+                    try:
+                        size = self.recieveFile(self.client)
+                        self.downloadFunc.emit(size)
+                    except InterruptedError:                 # stop() was called
+                        break
+                    except OSError:
+                        break
+                    except Exception as e:
+                        # self.errorOccurred.emit(str(e))   # later
                         self.statusFunc.emit("orange")
-                    else: # If the connection is not active then don't continue
-                        fileName = self.recvAll(self.client, nameSize).decode()
+                        self.connected = False
+                        self.client.close()
+                        self.client = None
 
-                        # Receive file data
-                        dataSize = int.from_bytes(self.recvAll(self.client, 6), "big")
-                        data = self.recvAll(self.client, dataSize)
+        finally:
+            if self.client:           # the worker closes its own socket on the way out
+                self.client.close()
+                self.client = None
 
-                        # Decrypt and save
-                        data = decrypt(data)
-                        with open(f"Recieved_files/{fileName}", "wb") as fh:
-                            fh.write(data)
-                        self.downloadFunc.emit(int(len(data)/1000))
-                except (ConnectionAbortedError, ConnectionResetError) as e:
-                    pass
-
-    def recvAll(self, sock: socket, size: int) -> bytes:
-        data = b""
+    def recieve(self, sock: socket.socket, size: int) -> bytes:
+        data = bytearray()
         while len(data) < size:
-            chunk = sock.recv(size - len(data))
+            if not self.running:
+                raise InterruptedError
+            try:
+                chunk = sock.recv(min(size - len(data), CHUNK_SIZE))
+            except socket.timeout:
+                continue
+
             if not chunk:
-                break
-            data += chunk
-        return data
+                raise ConnectionError("Peer closed connection")
+            
+            data.extend(chunk)
+        return bytes(data)
+
+    def recieveHeader(self, sock: socket) -> tuple[str, int]:
+        nameSize = int.from_bytes(self.recieve(sock, 1), "big")
+        fileName = self.recieve(sock, nameSize).decode()
+        fileSize = int.from_bytes(self.recieve(sock, 6), "big")
+
+        if fileSize > shutil.disk_usage(RECIEVED_DIR).free:
+            raise ValueError("Not enough disk space")
+
+        if nameSize <= 0:
+            raise ValueError("Bad name length")
+
+        _validateName(fileName)
+        
+        return (fileName, fileSize)
+
+    def recieveFile(self, sock: socket) -> int:
+        fileName, fileSize = self.recieveHeader(sock)
+        finalPath = RECIEVED_DIR + fileName
+        tempPath = finalPath + ".part"
+
+        try:
+            with open(tempPath, "wb") as fh:
+                remaining = fileSize
+                while remaining > 0:
+                    data = self.recieve(sock, min(CHUNK_SIZE, remaining))
+                    fh.write(data)
+                    remaining -= len(data)
+            os.replace(tempPath, finalPath)
+        except BaseException:
+            try:
+                os.remove(tempPath)
+            except OSError:
+                pass
+            raise
+
+        return fileSize
 
     def stop(self) -> None:
         self.running = False
-        if self.client:
-            self.client.close()
-            self.cleint = None
-
 class SenderThread(QThread):
     sentStatus = Signal(str)
     sentProgress = Signal(str)

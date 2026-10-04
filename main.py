@@ -40,25 +40,34 @@ class MainWindow(QMainWindow):
 
     # Callback methods
     def senderPushButton_callback(self):
+        """Sets the window to the sender page"""
         self.ui.stackedWidget.setCurrentIndex(0)
 
     def recieverPushButton_callback(self):
+        """Sets the window to the reciever page"""
         self.ui.stackedWidget.setCurrentIndex(1)
 
     def removePushButton_callback(self):
+        """Removes a current selected file"""
         fileName = self.ui.removeComboBox.currentText()
         self.remove_file(fileName)
         
     def browsePushButton_callback(self):
-        filePath, _ = QFileDialog.getOpenFileName(self, "Select File")
-        if filePath:
+        """Select files to upload"""
+        filePaths, _ = QFileDialog.getOpenFileNames(self, "Select File")
+        for filePath in filePaths:
             fileName = os.path.basename(filePath)
-            shutil.copy(filePath, f"Sending_files/{fileName}")
+
+            if self.ui.removeComboBox.findText(fileName) >= 0:
+                continue
+
+            shutil.copy(filePath, f"Sending_files/{fileName}") # RETURNS A LIST
 
             self.ui.removeComboBox.addItem(fileName)
             self.ui.addedFilesPlainTextEdit.insertPlainText(fileName + "\n")
 
     def connectPushButton_callback(self):
+        """Either tries to starts the connection process or ends the connection"""
         if self.senderSocket:
             # Reset
             self.senderSocket.close()
@@ -102,6 +111,7 @@ class MainWindow(QMainWindow):
             self.ui.recieverDestinationContainer.setEnabled(True)
 
     def sendPushButton_callback(self):
+        """Sends the files"""
         if not self.senderSocket:
             return
         self.ui.sendPushButton.setEnabled(False)
@@ -113,6 +123,7 @@ class MainWindow(QMainWindow):
         self.senderThread.start()
 
     def startPushButton_callback(self):
+        """Either starts the reciever or ends the reciever"""
         if self.recieverSocket:
             # Reset
             self.recieverThread.stop()
