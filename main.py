@@ -5,9 +5,6 @@ from PySide6.QtWidgets import QApplication, QMainWindow, QFileDialog
 from PySide6.QtGui import QIcon
 from Data.Design.ui import Ui_MainWindow
 
-# BUGS
-# Encryption is not implemented
-
 class MainWindow(QMainWindow):
     def __init__(self):
         super().__init__()

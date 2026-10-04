@@ -42,15 +42,15 @@ def setUpReciever() -> tuple[socket, int]:
 
     return (serverSocket, port)
 
-def encrypt(data: bytes) -> bytes:
-    cypher = AES.new(KEY, AES.MODE_EAX, NOISE)
-    data = cypher.encrypt(data)
-    return data
+# def encrypt(data: bytes) -> bytes:
+#     cypher = AES.new(KEY, AES.MODE_EAX, NOISE)
+#     data = cypher.encrypt(data)
+#     return data
 
-def decrypt(data: bytes) -> bytes:
-    cypher = AES.new(KEY, AES.MODE_EAX, NOISE)
-    data = cypher.decrypt(data)
-    return data
+# def decrypt(data: bytes) -> bytes:
+#     cypher = AES.new(KEY, AES.MODE_EAX, NOISE)
+#     data = cypher.decrypt(data)
+#     return data
 
 def getUserIp() -> str:
     return gethostbyname(gethostname())
@@ -141,6 +141,12 @@ class RecieverThread(QThread):
 
     def recieveFile(self, sock: socket) -> int:
         fileName, fileSize = self.recieveHeader(sock)
+        header = len(fileName.encode()).to_bytes(1, "big") + fileName.encode() + fileSize.to_bytes(6, "big")
+
+        nonce = self.recieve(sock, 16)
+        cypher = AES.new(KEY, AES.MODE_EAX, nonce=nonce)
+        cypher.update(header)
+
         finalPath = RECIEVED_DIR + fileName
         tempPath = finalPath + ".part"
 
@@ -151,6 +157,8 @@ class RecieverThread(QThread):
                     data = self.recieve(sock, min(CHUNK_SIZE, remaining))
                     fh.write(data)
                     remaining -= len(data)
+            tag = self.recieve(sock, 16)
+            cypher.verify(tag)
             os.replace(tempPath, finalPath)
         except BaseException:
             try:
@@ -179,28 +187,27 @@ class SenderThread(QThread):
         fileNames.remove(".gitkeep")
         sentProgress.emit(f"0/{len(fileNames)}")
         for i, fileName in enumerate(fileNames):
+            filePath = SEND_DIR + fileName
             fileSize = os.path.getsize(f"Sending_files/{fileName}")
-            fileNameEncoded = fileName.encode()
-            client.send(len(fileNameEncoded).to_bytes(1, "big"))
-            client.send(fileNameEncoded)
-            client.send(fileSize.to_bytes(6, "big"))
+            nameBytes = fileName.encode()
+            header = len(nameBytes).to_bytes(1, "big") + nameBytes + fileSize.to_bytes(6, "big")
 
-            #cypher = AES.new(KEY, AES.MODE_EAX, NOISE)
+            cypher = AES.new(KEY, AES.MODE_EAX)
+            cypher.update(header)
+
+            client.sendall(header)
+            client.sendall(cypher.nonce)
 
             with open(f"Sending_files/{fileName}", "rb") as fh:
-                while True:
-                    data = fh.read(CHUNK_SIZE)
-                    if not data:
-                        break
-                    # data = cypher.encrypt(data)
-
+                while data := fh.read(CHUNK_SIZE):
                     try:
-                        client.send(data)
+                        client.sendall(cypher.encrypt(data))
                     except ConnectionError:
                         self.sentStatus.emit("orange")
+                        return
 
-            # tag = cypher.digest() TAG TO VERIFY INTEGRITY
-            # client.send(tag)
+            tag = cypher.digest()
+            client.sendall(tag)
 
             removeFile.emit(fileName)
             sentProgress.emit(f"{str(i + 1)}/{str(len(fileNames))}")
