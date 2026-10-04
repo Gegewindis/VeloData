@@ -39,7 +39,6 @@ def setUpReciever() -> tuple[socket, int]:
     serverSocket.bind(('', 0))
     port = serverSocket.getsockname()[1]
     serverSocket.listen()
-
     return (serverSocket, port)
 
 # def encrypt(data: bytes) -> bytes:
@@ -155,7 +154,7 @@ class RecieverThread(QThread):
                 remaining = fileSize
                 while remaining > 0:
                     data = self.recieve(sock, min(CHUNK_SIZE, remaining))
-                    fh.write(data)
+                    fh.write(cypher.decrypt(data))
                     remaining -= len(data)
             tag = self.recieve(sock, 16)
             cypher.verify(tag)
